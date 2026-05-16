@@ -2,11 +2,12 @@
     <div class="oe_row oe_spaced">
         <h2 class="oe_slogan">Employee Portal Suite</h2>
         <h3 class="oe_slogan">
-            A complete Employee & Material Request system with Portal, Multi-Level Approvals, PDFs, and Purchase Integration
+            A complete Employee &amp; Material Request system with GPS Attendance, Portal Announcements,
+            Multi-Level Approvals, Interactive Dashboards, and Purchase Integration
         </h3>
         <p class="oe_mt32">
             Employee Portal Suite extends Odoo with a secure self-service portal for employees and a unified approval
-            center for managers, HR, finance teams, and executives.  
+            center for managers, HR, finance teams, and executives.
             It is designed for companies that require structured internal workflows, full traceability, and clean user experience.
         </p>
     </div>
@@ -17,7 +18,7 @@
         <h2 class="oe_slogan">Employee Portal Dashboard</h2>
         <p class="oe_mt16">
             Employees access a clean and intuitive portal dashboard where they can submit requests, track approval status,
-            and view documents awaiting signature — all without accessing the backend.
+            view documents awaiting signature, check in/out using GPS, and read portal announcements — all without accessing the backend.
         </p>
         <img class="oe_picture oe_screenshot" src="portal_employee.png"/>
     </div>
@@ -52,6 +53,7 @@
         <p class="oe_mt16">
             Material Requests allow employees to request materials for projects or worksites with full approval control.
             Each request includes worksite, delivery date validation, materials list, and accounting information.
+            Approved material requests are now also linked to vendor bills (Account Move) for full financial traceability.
         </p>
         <p>
             Approval stages are fully configurable and follow this flow:
@@ -69,7 +71,63 @@
 
 <section class="oe_container">
     <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Approval Timeline & Transparency</h2>
+        <h2 class="oe_slogan">GPS Attendance with Geofencing</h2>
+        <p class="oe_mt16">
+            Employees can check in and check out directly from the portal using their device's GPS location.
+            The system validates attendance against each employee's configured work location radius, ensuring
+            check-ins and check-outs occur only within the allowed geofenced area.
+        </p>
+        <p>
+            Key attendance features include:
+        </p>
+        <ul>
+            <li>GPS-based Check-In / Check-Out from the portal</li>
+            <li>Geofencing per work location with configurable radius</li>
+            <li>Out-of-bounds checkout flagging (<em>checkout_outside_location</em>)</li>
+            <li>Automatic checkout cron for employees who forgot to check out (<em>auto_checked_out</em>)</li>
+            <li>Attendance history and status visible on the employee portal</li>
+        </ul>
+        <img class="oe_picture oe_screenshot" src="portal_attendance.png"/>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">Portal Announcements</h2>
+        <p class="oe_mt16">
+            Administrators can publish time-bound announcements directly on the employee portal.
+            Announcements support rich HTML content, color-coded urgency levels (Blue, Green, Yellow, Red),
+            date ranges, and visibility filtering by user group — ensuring the right message reaches the right audience.
+        </p>
+        <ul>
+            <li>Rich HTML message editor</li>
+            <li>Start and end date scheduling</li>
+            <li>Group-based visibility control</li>
+            <li>Color-coded priority (Info / Success / Warning / Danger)</li>
+            <li>Ordering by sequence for editorial control</li>
+        </ul>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">Interactive Backend Dashboards</h2>
+        <p class="oe_mt16">
+            Both Employee Requests and Material Requests now include interactive Odoo backend dashboards
+            built with OWL components. Dashboards display real-time KPIs, request statuses, and key
+            metrics for managers and administrators at a glance.
+        </p>
+        <ul>
+            <li>Employee Requests Dashboard — status breakdown, pending approvals, recent activity</li>
+            <li>Material Requests Dashboard — open requests, approved/rejected counts, spending overview</li>
+            <li>Fully integrated into Odoo's backend assets pipeline (JS + XML + SCSS)</li>
+        </ul>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">Approval Timeline &amp; Transparency</h2>
         <p class="oe_mt16">
             Every request includes a detailed approval timeline visible in both the backend and the portal.
             Users can see exactly who approved each stage, when it was approved, and any comments added.
@@ -81,24 +139,25 @@
     </div>
 </section>
 
-<section class="oe_container oe_dark">
+<section class="oe_container">
     <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Purchase Order Integration</h2>
+        <h2 class="oe_slogan">Purchase Order &amp; Vendor Bill Integration</h2>
         <p class="oe_mt16">
             Once a Material Request is fully approved, the Purchase team can create Purchase Orders directly
-            from the request.
+            from the request. The system automatically links Purchase Orders to the originating Material Request,
+            displays PO numbers, and shows the current PO status (RFQ, Sent, Approved, Received, etc.).
         </p>
         <p>
-            The system automatically links Purchase Orders to the originating Material Request, displays PO numbers,
-            and shows the current PO status (RFQ, Sent, Approved, Received, etc.).
+            New in this version: approved Material Requests can also be linked to vendor bills (Account Moves),
+            providing full financial traceability from request to payment.
         </p>
         <img class="oe_picture oe_screenshot" src="material_request_link_PO.png"/>
     </div>
 </section>
 
-<section class="oe_container">
+<section class="oe_container oe_dark">
     <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Manager & Approvals Portal</h2>
+        <h2 class="oe_slogan">Manager &amp; Approvals Portal</h2>
         <p class="oe_mt16">
             Managers and approvers get a dedicated portal section where they can review pending Employee
             and Material Requests assigned to them.
@@ -111,9 +170,9 @@
     </div>
 </section>
 
-<section class="oe_container oe_dark">
+<section class="oe_container">
     <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">PDF Reports & Documentation</h2>
+        <h2 class="oe_slogan">PDF Reports &amp; Documentation</h2>
         <p class="oe_mt16">
             Each request type generates a professional PDF document including request details,
             materials, approval history, and signatures.
@@ -125,9 +184,9 @@
     </div>
 </section>
 
-<section class="oe_container">
+<section class="oe_container oe_dark">
     <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Roles, Security & Access Control</h2>
+        <h2 class="oe_slogan">Roles, Security &amp; Access Control</h2>
         <p class="oe_mt16">
             Employee Portal Suite uses dedicated security groups to ensure data isolation and correct access:
         </p>
@@ -141,6 +200,7 @@
         </ul>
         <p>
             Employees only see their own requests, while approvers see only items assigned to their role.
+            Attendance records are similarly isolated per employee.
         </p>
         <img class="oe_picture oe_screenshot" src="portal_user_settings.png"/>
     </div>
@@ -151,9 +211,12 @@
         <h2 class="oe_slogan">Why Choose Employee Portal Suite?</h2>
         <ul>
             <li>✔ Fully portal-based employee self-service</li>
+            <li>✔ GPS Attendance with geofencing and auto-checkout</li>
+            <li>✔ Portal Announcements with group-based targeting</li>
+            <li>✔ Interactive backend dashboards for Requests &amp; Material Requests</li>
             <li>✔ Multi-level approvals with full audit trail</li>
             <li>✔ Project-aware material approvals</li>
-            <li>✔ Integrated Purchase Orders</li>
+            <li>✔ Integrated Purchase Orders and Vendor Bills</li>
             <li>✔ Clean UI for both portal and backend</li>
             <li>✔ Designed for medium and large organizations</li>
         </ul>

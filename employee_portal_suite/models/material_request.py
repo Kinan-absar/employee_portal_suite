@@ -4,6 +4,7 @@ from datetime import timedelta
 from odoo.exceptions import ValidationError
 from odoo.tools import html2plaintext
 import re
+import base64
 
 class MaterialRequest(models.Model):
     _name = 'material.request'
@@ -90,6 +91,317 @@ class MaterialRequest(models.Model):
         domain="[('account_type', 'in', ('expense','expense_direct_cost'))]",
         tracking=True,
     )
+
+    # ---------------------------------------------------------
+    # PURCHASE / ACCOUNTING DOCUMENT TRACKING
+    # ---------------------------------------------------------
+    no_po_required = fields.Boolean(
+        string="No PO Required",
+        tracking=True,
+        help="Check this when this approved MR does not require a Purchase Order, for example small purchases below the company threshold."
+    )
+    po_created = fields.Boolean(
+        string="PO Created",
+        compute="_compute_po_created",
+        store=False,
+    )
+    accounting_docs_status = fields.Selection([
+        ("pending", "Pending Invoice"),
+        ("submitted", "Submitted to Accounting"),
+        ("received", "Received by Accounting"),
+        ("need_more", "Need More Invoice Docs"),
+        ("processed", "Processed"),
+        ("rejected", "Rejected"),
+    ], string="Invoice Submission Status", default="pending", tracking=True)
+    quotation_status_override = fields.Selection([
+        ("uploaded", "Quotations Uploaded"),
+        ("exception_approved", "Exception Approved"),
+        ("single_source_approved", "Single Source Approved"),
+    ], string="Quotation Status Override", tracking=True,
+       help="Optional manual override when fewer than three quotations are acceptable or an exception is approved.")
+    quotation_attachment_count = fields.Integer(
+        string="Quotation Count",
+        compute="_compute_quotation_status",
+        store=False,
+    )
+    quotation_status = fields.Selection([
+        ("pending", "Pending Quotations"),
+        ("remaining_2", "Remaining 2 Quotations"),
+        ("remaining_1", "Remaining 1 Quotation"),
+        ("uploaded", "Quotations Uploaded"),
+        ("exception_approved", "Exception Approved"),
+        ("single_source_approved", "Single Source Approved"),
+    ], string="Quotation Status", compute="_compute_quotation_status", store=False)
+    docs_submitted_by = fields.Many2one(
+        "res.users",
+        string="Docs Submitted By",
+        readonly=True,
+        tracking=True,
+    )
+    docs_submitted_date = fields.Datetime(
+        string="Docs Submitted Date",
+        readonly=True,
+        tracking=True,
+    )
+    accounting_docs_note = fields.Text(
+        string="Note to Accounting",
+        tracking=True,
+    )
+    accounting_docs_submitted_attachment_count = fields.Integer(
+        string="Submitted Accounting Attachment Count",
+        readonly=True,
+        default=0,
+        copy=False,
+        help="Technical field used by the portal to show Submit to Accounting only when new accounting documents were uploaded after the last submission.",
+    )
+
+    @api.depends("purchase_order_ids")
+    def _compute_po_created(self):
+        for rec in self:
+            rec.po_created = bool(rec.purchase_order_ids)
+
+    def _attachment_domain_by_category(self, category):
+        self.ensure_one()
+        legacy_description = {
+            "invoice_submission": "Accounting Documents",
+            "quotation": "Quotation Documents",
+            "general": "General",
+        }.get(category, "General")
+        return [
+            ("res_model", "=", "material.request"),
+            ("res_id", "=", self.id),
+            "|",
+            ("mr_attachment_category", "=", category),
+            ("description", "=", legacy_description),
+        ]
+
+    def _get_mr_attachment_count_by_category(self, category):
+        self.ensure_one()
+        return self.env["ir.attachment"].sudo().search_count(
+            self._attachment_domain_by_category(category)
+        )
+
+    def _compute_quotation_status(self):
+        for rec in self:
+            count = rec._get_mr_attachment_count_by_category("quotation") if rec.id else 0
+            rec.quotation_attachment_count = count
+            if rec.quotation_status_override:
+                rec.quotation_status = rec.quotation_status_override
+            elif count <= 0:
+                rec.quotation_status = "pending"
+            elif count == 1:
+                rec.quotation_status = "remaining_2"
+            elif count == 2:
+                rec.quotation_status = "remaining_1"
+            else:
+                rec.quotation_status = "uploaded"
+
+    def _get_accounting_attachment_count(self):
+        self.ensure_one()
+        return self._get_mr_attachment_count_by_category("invoice_submission")
+
+    def has_unsubmitted_accounting_docs(self):
+        self.ensure_one()
+        return self._get_accounting_attachment_count() > self.accounting_docs_submitted_attachment_count
+
+    def action_submit_docs_to_accounting(self, note=False):
+        for rec in self:
+            attachment_count = rec._get_accounting_attachment_count()
+            if not attachment_count or attachment_count <= rec.accounting_docs_submitted_attachment_count:
+                continue
+
+            if note is not False:
+                rec.accounting_docs_note = note
+            rec.accounting_docs_status = "submitted"
+            rec.docs_submitted_by = self.env.user.id
+            rec.docs_submitted_date = fields.Datetime.now()
+            rec.accounting_docs_submitted_attachment_count = attachment_count
+
+            body = _("Invoice documents submitted to Accounting.")
+            if rec.accounting_docs_note:
+                body += "\n\n%s\n%s" % (_("Note to Accounting:"), rec.accounting_docs_note)
+            rec.message_post(body=body, message_type="comment", subtype_xmlid="mail.mt_comment")
+
+    vendor_bill_ids = fields.One2many(
+        "account.move",
+        "material_request_id",
+        string="Vendor Bills",
+        domain=[("move_type", "=", "in_invoice")],
+    )
+    vendor_bill_count = fields.Integer(
+        string="Created Vendor Bills",
+        compute="_compute_vendor_bill_count",
+    )
+    can_create_vendor_bill = fields.Boolean(
+        string="Can Create Vendor Bill",
+        compute="_compute_can_create_vendor_bill",
+        store=False,
+    )
+
+    def _compute_vendor_bill_count(self):
+        for rec in self:
+            rec.vendor_bill_count = len(rec.vendor_bill_ids)
+
+    @api.depends("state", "no_po_required", "vendor_bill_ids", "purchase_order_ids")
+    def _compute_can_create_vendor_bill(self):
+        for rec in self:
+            # Direct vendor bills are only for No-PO MRs. If a PO exists,
+            # the vendor bill should be created from the PO/vendor bill flow.
+            rec.can_create_vendor_bill = (
+                rec.state == "approved"
+                and rec.no_po_required
+                and not rec.purchase_order_ids
+                and not rec.vendor_bill_ids.filtered(lambda move: move.move_type == "in_invoice")
+            )
+
+    def _prepare_vendor_bill_line_vals(self):
+        self.ensure_one()
+        lines = []
+        for line in self.line_ids:
+            vals = {
+                "name": line.item_name or self.name,
+                "quantity": line.qty_required or 1.0,
+            }
+            if self.expense_account_id:
+                vals["account_id"] = self.expense_account_id.id
+            if line.uom_id:
+                vals["product_uom_id"] = line.uom_id.id
+            lines.append((0, 0, vals))
+        return lines
+
+    def action_create_vendor_bill(self):
+        self.ensure_one()
+
+        if not self.no_po_required:
+            raise UserError(_("Vendor Bill can only be created directly when No PO Required is checked."))
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Vendor Bill"),
+            "res_model": "account.move",
+            "view_mode": "form",
+            "target": "current",
+            "context": {
+                "default_move_type": "in_invoice",
+                "default_material_request_id": self.id,
+                "default_invoice_line_ids": self._prepare_vendor_bill_line_vals(),
+            },
+        }
+
+    def action_open_vendor_bills(self):
+        self.ensure_one()
+
+        bills = self.vendor_bill_ids.filtered(lambda move: move.move_type == "in_invoice")
+        if not bills:
+            return {
+                "type": "ir.actions.act_window",
+                "name": _("Vendor Bill"),
+                "res_model": "account.move",
+                "view_mode": "form",
+                "target": "current",
+                "context": {
+                    "default_move_type": "in_invoice",
+                    "default_material_request_id": self.id,
+                        "default_invoice_line_ids": self._prepare_vendor_bill_line_vals(),
+                },
+            }
+
+        action = {
+            "type": "ir.actions.act_window",
+            "name": _("Vendor Bills"),
+            "res_model": "account.move",
+            "view_mode": "list,form",
+            "domain": [("id", "in", bills.ids)],
+            "context": {"default_move_type": "in_invoice"},
+            "target": "current",
+        }
+        if len(bills) == 1:
+            action.update({"view_mode": "form", "res_id": bills.id})
+        return action
+
+    # ---------------------------------------------------------
+    # CLARIFICATION
+    # ---------------------------------------------------------
+    needs_clarification = fields.Boolean(default=False)
+
+    clarification_stage = fields.Selection(
+        selection=lambda self: self._fields['state'].selection,
+        string="Clarification Stage"
+    )
+
+    can_toggle_clarification = fields.Boolean(
+        compute="_compute_can_toggle_clarification"
+    )
+
+    def _compute_can_toggle_clarification(self):
+        for rec in self:
+            rec.can_toggle_clarification = rec._can_toggle_clarification()
+
+
+    def _can_toggle_clarification(self):
+        self.ensure_one()
+        user = self.env.user
+
+        # Cannot toggle in these states
+        if self.state in ("draft", "approved", "rejected"):
+            return False
+
+        # Project based stages
+        if self.state == "store":
+            return user == self.store_manager_user_id
+
+        if self.state == "project_manager":
+            return user == self.project_manager_user_id
+
+        # Group based stages
+        stage_group_map = {
+            "purchase": "employee_portal_suite.group_mr_purchase_rep",
+            "director": "employee_portal_suite.group_mr_projects_director",
+            "ceo": "employee_portal_suite.group_employee_portal_ceo",
+        }
+
+        group = stage_group_map.get(self.state)
+        if group:
+            return user.has_group(group)
+
+        return False
+
+    def write(self, vals):
+
+        if "needs_clarification" in vals:
+            for rec in self:
+
+                if not rec._can_toggle_clarification():
+                    raise UserError(_("You are not allowed to toggle clarification at this stage."))
+
+                # When turning ON → remember stage
+                if vals.get("needs_clarification"):
+                    vals["clarification_stage"] = rec.state
+
+                # When turning OFF → clear stage
+                else:
+                    vals["clarification_stage"] = False
+
+        return super().write(vals)
+
+    display_state = fields.Char(
+        string="Display Status",
+        compute="_compute_display_state",
+        store=False
+    )
+
+    @api.depends("state", "needs_clarification", "clarification_stage")
+    def _compute_display_state(self):
+        stage_labels = dict(self._fields['state'].selection)
+
+        for rec in self:
+            if rec.needs_clarification and rec.clarification_stage:
+                stage_name = stage_labels.get(rec.clarification_stage, "")
+                rec.display_state = f"🚩 Clarification — {stage_name}"
+            else:
+                rec.display_state = stage_labels.get(rec.state, "")
+
+
 
     # ---------------------------------------------------------
     # STATE MACHINE
@@ -245,7 +557,6 @@ class MaterialRequest(models.Model):
             rec[approved_date_field] = fields.Datetime.now()
             rec.state = new_state
 
-            rec.message_post(body=f"{new_state.replace('_', ' ').title()} stage approved.")
             rec.activity_ids.action_done()
 
             # -------------------------------------------------
@@ -444,17 +755,15 @@ class MaterialRequest(models.Model):
             rec.ceo_approved_by = self.env.user.id
             rec.ceo_approved_date = fields.Datetime.now()
             rec.state = "approved"
+            rec._send_final_pdf_and_notify_all(
+                report_xmlid="employee_portal_suite.material_request_pdf",
+                subject=f"Material Request {rec.name} – Approved",
+                body=f"Material Request {rec.name} has been fully approved. Please find the attached document."
+            )
+
 
             rec.message_post(body="Material Request fully approved.")
             rec.activity_ids.action_done()
-
-            if rec.employee_id.user_id:
-                rec._notify_user(
-                    rec.employee_id.user_id,
-                    "Material Request Approved",
-                    f"Your Material Request {rec.name} has been approved."
-                )
-
 
     def action_reject(self):
         for rec in self:
@@ -476,16 +785,15 @@ class MaterialRequest(models.Model):
             rec.state_before_reject = rec.state
             rec.rejected_by = self.env.user.id
             rec.state = "rejected"
+            rec._send_final_pdf_and_notify_all(
+                report_xmlid="employee_portal_suite.material_request_pdf",
+                subject=f"Material Request {rec.name} – Rejected",
+                body=f"Material Request {rec.name} has been rejected. Please find the attached document."
+            )
+
 
             rec.message_post(body="Material Request rejected.")
             rec.activity_ids.action_done()
-
-            if rec.employee_id.user_id:
-                rec._notify_user(
-                    rec.employee_id.user_id,
-                    "Material Request Rejected",
-                    f"Your Material Request {rec.name} has been rejected."
-                )
 
     def get_rejection_reason(self):
         self.ensure_one()
@@ -551,6 +859,26 @@ class MaterialRequest(models.Model):
 
         return timeline
         
+    @api.model
+    def retrieve_dashboard(self):
+        domain = []
+        data = {
+            'all_count': self.search_count(domain),
+            'draft_count': self.search_count([('state', '=', 'draft')]),
+            'purchase_count': self.search_count([('state', '=', 'purchase')]),
+            'store_count': self.search_count([('state', '=', 'store')]),
+            'project_manager_count': self.search_count([('state', '=', 'project_manager')]),
+            'director_count': self.search_count([('state', '=', 'director')]),
+            'ceo_count': self.search_count([('state', '=', 'ceo')]),
+            'approved_count': self.search_count([('state', '=', 'approved')]),
+            'rejected_count': self.search_count([('state', '=', 'rejected')]),
+            'clarification_count': self.search_count([('needs_clarification', '=', True)]),
+            'my_count': self.search_count([('create_uid', '=', self.env.user.id)]),
+            'po_required_count': self.search_count([('no_po_required', '=', False)]),
+            'no_po_required_count': self.search_count([('no_po_required', '=', True)]),
+        }
+        return data
+
     def get_readable_status(self):
         mapping = {
             "purchase": "Pending Purchase",
@@ -606,9 +934,11 @@ class MaterialRequest(models.Model):
 
     def _compute_can_create_po(self):
         for rec in self:
+            # Allow more than one PO to be created from the same approved MR.
+            # The button is hidden only when this MR is marked as No PO Required.
             rec.can_create_po = (
                 rec.state == "approved"
-                and not rec.purchase_order_ids
+                and not rec.no_po_required
             )
 
     # END OF INSERTION
@@ -670,6 +1000,73 @@ class MaterialRequest(models.Model):
             "view_mode": "list,form",
             "target": "current",
         }
+    def _send_final_pdf_and_notify_all(self, report_xmlid, subject, body):
+        self.ensure_one()
+
+        # --------------------------------------------------
+        # 1) Render PDF
+        # --------------------------------------------------
+        report = self.env.ref(report_xmlid)
+        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
+            report.id, [self.id]
+        )
+
+        attachment = self.env['ir.attachment'].sudo().create({
+            'name': f"{self.name}.pdf",
+            'type': 'binary',
+            'datas': base64.b64encode(pdf_content),
+            'res_model': self._name,
+            'res_id': self.id,
+            'mimetype': 'application/pdf',
+        })
+
+        # --------------------------------------------------
+        # 2) Collect users / emails
+        # --------------------------------------------------
+        partners = set()
+        emails = set()
+
+        def _add_user(user):
+            if not user or not user.partner_id:
+                return
+            partners.add(user.partner_id.id)
+            if user.partner_id.email:
+                emails.add(user.partner_id.email)
+
+        # Requester
+        if self.employee_id.user_id:
+            _add_user(self.employee_id.user_id)
+
+        # Approvers
+        approver_fields = [
+            'manager_approved_by',
+            'hr_approved_by',
+            'finance_approved_by',
+            'purchase_approved_by',
+            'store_approved_by',
+            'project_manager_approved_by',
+            'director_approved_by',
+            'ceo_approved_by',
+        ]
+
+        for field in approver_fields:
+            if field in self._fields:
+                _add_user(getattr(self, field))
+
+        # --------------------------------------------------
+        # 4) EMAIL (SMTP) with PDF
+        # --------------------------------------------------
+        if emails:
+            mail = self.env['mail.mail'].sudo().create({
+                'subject': subject,
+                'body_html': f"<p>{body}</p>",
+                'email_to': ",".join(emails),
+                'attachment_ids': [(4, attachment.id)],
+                'author_id': self.env.user.partner_id.id,
+            })
+            mail.send()
+
+
 
         
 from odoo import models, api
