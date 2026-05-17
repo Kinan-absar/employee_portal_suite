@@ -1,224 +1,1886 @@
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Employee Portal Suite</h2>
-        <h3 class="oe_slogan">
-            A complete Employee &amp; Material Request system with GPS Attendance, Portal Announcements,
-            Multi-Level Approvals, Interactive Dashboards, and Purchase Integration
-        </h3>
-        <p class="oe_mt32">
-            Employee Portal Suite extends Odoo with a secure self-service portal for employees and a unified approval
-            center for managers, HR, finance teams, and executives.
-            It is designed for companies that require structured internal workflows, full traceability, and clean user experience.
-        </p>
-    </div>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Portal Suite — Configuration Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink2: #3d3d5c;
+    --ink3: #6b6b8a;
+    --surface: #ffffff;
+    --surface2: #f5f4f1;
+    --surface3: #eeecea;
+    --accent: #2563eb;
+    --accent2: #7c3aed;
+    --accent3: #059669;
+    --accent4: #dc2626;
+    --accent5: #d97706;
+    --border: rgba(26,26,46,0.1);
+    --border2: rgba(26,26,46,0.06);
+    --shadow: 0 1px 3px rgba(26,26,46,0.08), 0 4px 16px rgba(26,26,46,0.04);
+    --shadow-lg: 0 2px 8px rgba(26,26,46,0.1), 0 12px 40px rgba(26,26,46,0.06);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Sora', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: #f0efe9;
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 15px;
+  }
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Employee Portal Dashboard</h2>
-        <p class="oe_mt16">
-            Employees access a clean and intuitive portal dashboard where they can submit requests, track approval status,
-            view documents awaiting signature, check in/out using GPS, and read portal announcements — all without accessing the backend.
-        </p>
-        <img class="oe_picture oe_screenshot" src="portal_employee.png"/>
-    </div>
-</section>
+  /* HERO */
+  .hero {
+    background: var(--ink);
+    color: #fff;
+    padding: 64px 48px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 80px;
+    width: 200px; height: 200px;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    max-width: 600px;
+  }
+  .hero p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    max-width: 540px;
+    font-weight: 300;
+    margin-bottom: 32px;
+  }
+  .hero-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.75);
+  }
+  .pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #34d399;
+    flex-shrink: 0;
+  }
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Employee Requests Workflow</h2>
-        <p class="oe_mt16">
-            Employees can submit a wide range of internal requests such as leave, salary advance, training,
-            medical reimbursement, asset requests, letters, transfers, and more.
-        </p>
-        <p>
-            Each request follows a structured approval flow:
-        </p>
-        <ul>
-            <li>Employee → Direct Manager</li>
-            <li>HR Approval</li>
-            <li>Finance Approval</li>
-            <li>CEO Approval</li>
-        </ul>
-        <p>
-            Requests are automatically numbered, tracked, and fully logged with approval dates and comments.
-        </p>
-        <img class="oe_picture oe_screenshot" src="portal_employee_request_form.png"/>
-    </div>
-</section>
+  /* LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 200px);
+  }
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Material Requests Management</h2>
-        <p class="oe_mt16">
-            Material Requests allow employees to request materials for projects or worksites with full approval control.
-            Each request includes worksite, delivery date validation, materials list, and accounting information.
-            Approved material requests are now also linked to vendor bills (Account Move) for full financial traceability.
-        </p>
-        <p>
-            Approval stages are fully configurable and follow this flow:
-        </p>
-        <ul>
-            <li>Purchase Representative</li>
-            <li>Store Manager (Project-based)</li>
-            <li>Project Manager</li>
-            <li>Projects Director</li>
-            <li>CEO Approval</li>
-        </ul>
-        <img class="oe_picture oe_screenshot" src="material_request_form.png"/>
-    </div>
-</section>
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 0;
+  }
+  .sidebar-section {
+    margin-bottom: 4px;
+  }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding: 6px 20px 4px;
+  }
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 20px;
+    font-size: 13.5px;
+    color: var(--ink2);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .sidebar-link:hover {
+    background: var(--surface2);
+    color: var(--ink);
+    border-left-color: var(--border);
+  }
+  .sidebar-link.active {
+    background: #eff6ff;
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+  .sidebar-link svg {
+    width: 14px; height: 14px;
+    flex-shrink: 0;
+    opacity: 0.6;
+  }
+  .sidebar-link.active svg { opacity: 1; }
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">GPS Attendance with Geofencing</h2>
-        <p class="oe_mt16">
-            Employees can check in and check out directly from the portal using their device's GPS location.
-            The system validates attendance against each employee's configured work location radius, ensuring
-            check-ins and check-outs occur only within the allowed geofenced area.
-        </p>
-        <p>
-            Key attendance features include:
-        </p>
-        <ul>
-            <li>GPS-based Check-In / Check-Out from the portal</li>
-            <li>Geofencing per work location with configurable radius</li>
-            <li>Out-of-bounds checkout flagging (<em>checkout_outside_location</em>)</li>
-            <li>Automatic checkout cron for employees who forgot to check out (<em>auto_checked_out</em>)</li>
-            <li>Attendance history and status visible on the employee portal</li>
-        </ul>
-        <img class="oe_picture oe_screenshot" src="portal_attendance.png"/>
-    </div>
-</section>
+  /* CONTENT */
+  .content {
+    padding: 40px 48px;
+    max-width: 860px;
+  }
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Portal Announcements</h2>
-        <p class="oe_mt16">
-            Administrators can publish time-bound announcements directly on the employee portal.
-            Announcements support rich HTML content, color-coded urgency levels (Blue, Green, Yellow, Red),
-            date ranges, and visibility filtering by user group — ensuring the right message reaches the right audience.
-        </p>
-        <ul>
-            <li>Rich HTML message editor</li>
-            <li>Start and end date scheduling</li>
-            <li>Group-based visibility control</li>
-            <li>Color-coded priority (Info / Success / Warning / Danger)</li>
-            <li>Ordering by sequence for editorial control</li>
-        </ul>
-    </div>
-</section>
+  /* SECTIONS */
+  .section {
+    display: none;
+  }
+  .section.active {
+    display: block;
+  }
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Interactive Backend Dashboards</h2>
-        <p class="oe_mt16">
-            Both Employee Requests and Material Requests now include interactive Odoo backend dashboards
-            built with OWL components. Dashboards display real-time KPIs, request statuses, and key
-            metrics for managers and administrators at a glance.
-        </p>
-        <ul>
-            <li>Employee Requests Dashboard — status breakdown, pending approvals, recent activity</li>
-            <li>Material Requests Dashboard — open requests, approved/rejected counts, spending overview</li>
-            <li>Fully integrated into Odoo's backend assets pipeline (JS + XML + SCSS)</li>
-        </ul>
-    </div>
-</section>
+  /* HEADINGS */
+  h2.section-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 14px;
+    color: var(--ink3);
+    margin-bottom: 32px;
+    font-weight: 300;
+  }
+  h3.sub-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h3.sub-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Approval Timeline &amp; Transparency</h2>
-        <p class="oe_mt16">
-            Every request includes a detailed approval timeline visible in both the backend and the portal.
-            Users can see exactly who approved each stage, when it was approved, and any comments added.
-        </p>
-        <p>
-            Rejections clearly show the rejection stage and reason, ensuring transparency and reducing follow-ups.
-        </p>
-        <img class="oe_picture oe_screenshot" src="material_request_pdf.png"/>
-    </div>
-</section>
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .card-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 17px;
+  }
+  .card-icon.blue   { background: #dbeafe; }
+  .card-icon.purple { background: #ede9fe; }
+  .card-icon.green  { background: #d1fae5; }
+  .card-icon.amber  { background: #fef3c7; }
+  .card-icon.red    { background: #fee2e2; }
+  .card-icon.teal   { background: #ccfbf1; }
+  .card-icon.gray   { background: var(--surface3); }
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Purchase Order &amp; Vendor Bill Integration</h2>
-        <p class="oe_mt16">
-            Once a Material Request is fully approved, the Purchase team can create Purchase Orders directly
-            from the request. The system automatically links Purchase Orders to the originating Material Request,
-            displays PO numbers, and shows the current PO status (RFQ, Sent, Approved, Received, etc.).
-        </p>
-        <p>
-            New in this version: approved Material Requests can also be linked to vendor bills (Account Moves),
-            providing full financial traceability from request to payment.
-        </p>
-        <img class="oe_picture oe_screenshot" src="material_request_link_PO.png"/>
-    </div>
-</section>
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .card-sub {
+    font-size: 12px;
+    color: var(--ink3);
+  }
+  .card p {
+    font-size: 13.5px;
+    color: var(--ink2);
+    line-height: 1.65;
+  }
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Manager &amp; Approvals Portal</h2>
-        <p class="oe_mt16">
-            Managers and approvers get a dedicated portal section where they can review pending Employee
-            and Material Requests assigned to them.
-        </p>
-        <p>
-            Approvals are permission-based and respect project-specific roles such as Store Manager
-            and Project Manager.
-        </p>
-        <img class="oe_picture oe_screenshot" src="portal_manager.png"/>
-    </div>
-</section>
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">PDF Reports &amp; Documentation</h2>
-        <p class="oe_mt16">
-            Each request type generates a professional PDF document including request details,
-            materials, approval history, and signatures.
-        </p>
-        <p>
-            PDFs can be printed or shared directly from Odoo, ensuring proper documentation and audit readiness.
-        </p>
-        <img class="oe_picture oe_screenshot" src="material_request_pdf.png"/>
-    </div>
-</section>
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .badge.blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge.green  { background: #d1fae5; color: #065f46; }
+  .badge.purple { background: #ede9fe; color: #5b21b6; }
+  .badge.amber  { background: #fef3c7; color: #92400e; }
+  .badge.red    { background: #fee2e2; color: #991b1b; }
+  .badge.gray   { background: var(--surface3); color: var(--ink3); }
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Roles, Security &amp; Access Control</h2>
-        <p class="oe_mt16">
-            Employee Portal Suite uses dedicated security groups to ensure data isolation and correct access:
-        </p>
-        <ul>
-            <li>Employee Portal User</li>
-            <li>Manager</li>
-            <li>HR</li>
-            <li>Finance</li>
-            <li>Projects Director</li>
-            <li>CEO</li>
-        </ul>
-        <p>
-            Employees only see their own requests, while approvers see only items assigned to their role.
-            Attendance records are similarly isolated per employee.
-        </p>
-        <img class="oe_picture oe_screenshot" src="portal_user_settings.png"/>
-    </div>
-</section>
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .flow-node {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink2);
+    position: relative;
+  }
+  .flow-node.active {
+    background: #dbeafe;
+    border-color: #93c5fd;
+    color: #1e3a8a;
+  }
+  .flow-arrow {
+    color: var(--ink3);
+    padding: 0 6px;
+    font-size: 14px;
+  }
 
-<section class="oe_container oe_separator">
-    <div class="oe_row oe_spaced">
-        <h2 class="oe_slogan">Why Choose Employee Portal Suite?</h2>
-        <ul>
-            <li>✔ Fully portal-based employee self-service</li>
-            <li>✔ GPS Attendance with geofencing and auto-checkout</li>
-            <li>✔ Portal Announcements with group-based targeting</li>
-            <li>✔ Interactive backend dashboards for Requests &amp; Material Requests</li>
-            <li>✔ Multi-level approvals with full audit trail</li>
-            <li>✔ Project-aware material approvals</li>
-            <li>✔ Integrated Purchase Orders and Vendor Bills</li>
-            <li>✔ Clean UI for both portal and backend</li>
-            <li>✔ Designed for medium and large organizations</li>
-        </ul>
+  /* PERMISSION TABLE */
+  .perm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 12px 0 24px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .perm-table th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    border-bottom: 1px solid var(--border);
+  }
+  .perm-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border2);
+    color: var(--ink2);
+    vertical-align: top;
+  }
+  .perm-table tr:last-child td { border-bottom: none; }
+  .perm-table tr:hover td { background: var(--surface2); }
+  .check { color: #059669; font-weight: 700; }
+  .cross { color: #9ca3af; }
+
+  /* CALLOUT */
+  .callout {
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .callout.blue  { background: #eff6ff; border-left: 3px solid #3b82f6; color: #1e3a8a; }
+  .callout.amber { background: #fffbeb; border-left: 3px solid #f59e0b; color: #78350f; }
+  .callout.green { background: #f0fdf4; border-left: 3px solid #22c55e; color: #14532d; }
+  .callout.red   { background: #fef2f2; border-left: 3px solid #ef4444; color: #7f1d1d; }
+  .callout-icon  { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* CODE */
+  .code-block {
+    background: var(--ink);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: #a5f3fc;
+    overflow-x: auto;
+    margin: 12px 0;
+    line-height: 1.7;
+  }
+  .code-block .cm { color: #6b7280; }
+  .code-block .ck { color: #fbbf24; }
+  .code-block .cv { color: #34d399; }
+  .code-block .cs { color: #f87171; }
+
+  /* STEP LIST */
+  .steps {
+    counter-reset: step;
+    margin: 12px 0 20px;
+  }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .step::before {
+    counter-increment: step;
+    content: counter(step);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-body {
+    flex: 1;
+  }
+  .step-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .step-desc {
+    font-size: 13.5px;
+    color: var(--ink2);
+    line-height: 1.6;
+  }
+  .step-desc code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface3);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--accent2);
+  }
+
+  /* INLINE FLOW DIAGRAM */
+  .approval-flow {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: var(--surface2);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    gap: 0;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+  .af-node {
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .af-node .af-role {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink3);
+    margin-bottom: 4px;
+  }
+  .af-node .af-box {
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 80px;
+  }
+  .af-node .af-state {
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 3px;
+    font-family: var(--mono);
+  }
+  .af-arrow {
+    font-size: 16px;
+    color: var(--ink3);
+    padding: 0 6px;
+    flex-shrink: 0;
+    margin-top: -16px;
+  }
+
+  /* GPS DIAGRAM */
+  .gps-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin: 16px 0;
+  }
+  .gps-viz {
+    position: relative;
+    height: 160px;
+    background: #e8f4e8;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .gps-outer {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    border: 2px dashed #86efac;
+    background: rgba(134,239,172,0.15);
+  }
+  .gps-inner {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: rgba(16,185,129,0.2);
+    border: 2px solid #10b981;
+  }
+  .gps-pin {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
+  }
+  .gps-user-ok {
+    position: absolute;
+    top: 50%; left: 35%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+  }
+  .gps-user-bad {
+    position: absolute;
+    top: 20%; left: 80%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+  }
+  .gps-label-ok {
+    position: absolute;
+    top: 55%; left: 16%;
+    font-size: 10px;
+    color: #065f46;
+    font-weight: 600;
+    background: #d1fae5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .gps-label-bad {
+    position: absolute;
+    top: 5%; left: 66%;
+    font-size: 10px;
+    color: #991b1b;
+    font-weight: 600;
+    background: #fee2e2;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .gps-radius-label {
+    position: absolute;
+    bottom: 6px; right: 8px;
+    font-size: 10px;
+    color: #065f46;
+    font-family: var(--mono);
+    background: rgba(255,255,255,0.8);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* INFOGRAPHIC STRIP */
+  .info-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .info-strip-item {
+    background: var(--surface);
+    padding: 20px 16px;
+    text-align: center;
+  }
+  .info-strip-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .info-strip-label {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  /* TAG */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+    margin: 2px 2px;
+  }
+  .tag.route { background: #f3e8ff; color: #6d28d9; }
+  .tag.model { background: #e0f2fe; color: #0369a1; }
+  .tag.group { background: #fef3c7; color: #92400e; }
+
+  /* DIVIDER */
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border2);
+    margin: 28px 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .content { padding: 24px 20px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .info-strip { grid-template-columns: 1fr 1fr; }
+    .hero { padding: 40px 24px 32px; }
+    .hero h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge"><span class="dot"></span> Odoo Module Documentation</div>
+  <h1>Employee Portal Suite</h1>
+  <p>Complete configuration and usage guide — backend settings, security groups, approval workflows, GPS attendance, and portal features.</p>
+  <div class="hero-pills">
+    <div class="pill">Employee Requests</div>
+    <div class="pill">Material Requests</div>
+    <div class="pill">GPS Attendance</div>
+    <div class="pill">Multi-level Approvals</div>
+    <div class="pill">Document Signing</div>
+    <div class="pill">Announcements</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" role="navigation" aria-label="Documentation sections">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <a class="sidebar-link active" onclick="show('overview')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Module Overview
+      </a>
     </div>
-</section>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Security &amp; Groups</div>
+      <a class="sidebar-link" onclick="show('groups')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zM2 14s-1 0-1-1 1-4 7-4 7 3 7 4-1 1-1 1H2z"/></svg>
+        Security Groups
+      </a>
+      <a class="sidebar-link" onclick="show('access')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11 1a4 4 0 014 4v1h-2V5a2 2 0 00-4 0v1H5V5a4 4 0 014-4h2zM3 8a1 1 0 011-1h8a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8z"/></svg>
+        Access Permissions
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Backend Configuration</div>
+      <a class="sidebar-link" onclick="show('backend-setup')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 1A.5.5 0 016 .5V0h4v.5a.5.5 0 01-.5.5H8v1h2l2 2h1a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h1L6 2H8V1H6.5z"/></svg>
+        Backend Setup
+      </a>
+      <a class="sidebar-link" onclick="show('work-locations')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C5.2 0 3 2.2 3 5c0 3.8 5 11 5 11s5-7.2 5-11c0-2.8-2.2-5-5-5zm0 7.5A2.5 2.5 0 1110.5 5 2.5 2.5 0 018 7.5z"/></svg>
+        Work Locations &amp; GPS
+      </a>
+      <a class="sidebar-link" onclick="show('projects')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="14" height="3" rx="1"/><rect x="1" y="6" width="8" height="3" rx="1"/><rect x="1" y="11" width="11" height="3" rx="1"/></svg>
+        Projects Configuration
+      </a>
+      <a class="sidebar-link" onclick="show('announcements')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 4a1 1 0 011-1h12a1 1 0 011 1v8a1 1 0 01-1 1H2a1 1 0 01-1-1V4zm4 4H3v2h2V8zm8-2H3v2h10V6z"/></svg>
+        Announcements
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Workflows</div>
+      <a class="sidebar-link" onclick="show('employee-requests')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 1h12a1 1 0 011 1v12a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1zm1 2v10h10V3H3zm2 2h6v1H5V5zm0 3h6v1H5V8zm0 3h4v1H5v-1z"/></svg>
+        Employee Requests
+      </a>
+      <a class="sidebar-link" onclick="show('material-requests')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1H2V3zM1 5h14l-1 9H2L1 5zm4 2v5h1V7H5zm5 0v5h1V7h-1z"/></svg>
+        Material Requests
+      </a>
+      <a class="sidebar-link" onclick="show('attendance')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 4v4l3 2"/></svg>
+        GPS Attendance
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Portal User Guide</div>
+      <a class="sidebar-link" onclick="show('portal-employee')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a4 4 0 100-8 4 4 0 000 8zm-6 8a6 6 0 0112 0H2z"/></svg>
+        Employee Portal
+      </a>
+      <a class="sidebar-link" onclick="show('portal-manager')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a4 4 0 100 8 4 4 0 000-8zM2 14s-1 0-1-1 1-4 7-4 7 3 7 4-1 1-1 1H2zM11 8l4 4-4 4v-3H7v-2h4V8z"/></svg>
+        Manager Approvals
+      </a>
+      <a class="sidebar-link" onclick="show('automation')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a5 5 0 100 10A5 5 0 008 1zM0 8a8 8 0 1116 0A8 8 0 010 8zm5-2h6v1H5V6zm0 2h6v1H5V8zm0 2h4v1H5v-1z"/></svg>
+        Automation &amp; Crons
+      </a>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content" role="main">
+
+    <!-- ======================== OVERVIEW ======================== -->
+    <section id="overview" class="section active">
+      <h2 class="section-title">Module Overview</h2>
+      <p class="section-desc">Employee Portal Suite is a comprehensive Odoo module that creates a complete self-service environment accessible at <code style="font-family:monospace;font-size:12px;background:var(--surface3);padding:2px 6px;border-radius:4px">/my/employee</code>.</p>
+
+      <div class="info-strip">
+        <div class="info-strip-item">
+          <div class="info-strip-num">13</div>
+          <div class="info-strip-label">Request types supported</div>
+        </div>
+        <div class="info-strip-item">
+          <div class="info-strip-num">5</div>
+          <div class="info-strip-label">Employee request stages</div>
+        </div>
+        <div class="info-strip-item">
+          <div class="info-strip-num">6</div>
+          <div class="info-strip-item">
+          <div class="info-strip-num">6</div>
+          <div class="info-strip-label">Material request stages</div>
+        </div>
+        </div>
+        <div class="info-strip-item">
+          <div class="info-strip-num">11</div>
+          <div class="info-strip-label">Security groups</div>
+        </div>
+      </div>
+
+      <h3 class="sub-title">What the module provides</h3>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon blue">📋</div>
+            <div>
+              <div class="card-title">Employee Requests</div>
+              <div class="card-sub">Multi-level approval workflow</div>
+            </div>
+          </div>
+          <p>Employees submit requests (leave, salary advance, training, etc.) that route through Manager → HR → Finance → CEO. Each stage sends notifications and logs approval metadata.</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon amber">📦</div>
+            <div>
+              <div class="card-title">Material Requests</div>
+              <div class="card-sub">6-stage procurement workflow</div>
+            </div>
+          </div>
+          <p>Employees request materials linked to their project. Requests flow through Purchase Rep → Store Manager → Project Manager → Director → CEO with quotation tracking and PO linking.</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon green">📍</div>
+            <div>
+              <div class="card-title">GPS Attendance</div>
+              <div class="card-sub">Geofenced check-in / check-out</div>
+            </div>
+          </div>
+          <p>Employees check in/out from the portal. Each work location has configurable GPS coordinates and an allowed radius. Out-of-range checkouts are flagged and HR is notified.</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon purple">✍️</div>
+            <div>
+              <div class="card-title">Document Signing</div>
+              <div class="card-sub">Integrated with Odoo Sign</div>
+            </div>
+          </div>
+          <p>Pending signature requests from Odoo Sign surface in the employee portal dashboard. Employees can track and complete signatures without leaving the portal.</p>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Dependencies</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+        <span class="tag model">base</span><span class="tag model">web</span><span class="tag model">portal</span>
+        <span class="tag model">hr</span><span class="tag model">mail</span><span class="tag model">hr_attendance</span>
+        <span class="tag model">base_automation</span><span class="tag model">website</span><span class="tag model">purchase</span>
+        <span class="tag model">sign</span><span class="tag model">project</span><span class="tag model">account</span>
+      </div>
+
+      <h3 class="sub-title">Key URL routes</h3>
+      <div class="card">
+        <table style="width:100%;font-size:13px;border-collapse:collapse;">
+          <tr style="border-bottom:1px solid var(--border2)">
+            <td style="padding:8px 0;color:var(--ink3);width:100px;font-size:11px;font-weight:600;text-transform:uppercase;">Route</td>
+            <td style="padding:8px 0;color:var(--ink3);font-size:11px;font-weight:600;text-transform:uppercase;">Description</td>
+            <td style="padding:8px 0;color:var(--ink3);font-size:11px;font-weight:600;text-transform:uppercase;">Access</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border2)">
+            <td style="padding:8px 0"><span class="tag route">/my/employee</span></td>
+            <td style="padding:8px;color:var(--ink2)">Main portal dashboard</td>
+            <td><span class="badge green">All portal users</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border2)">
+            <td style="padding:8px 0"><span class="tag route">/my/employee/requests</span></td>
+            <td style="padding:8px;color:var(--ink2)">My employee requests list</td>
+            <td><span class="badge blue">Employee group</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border2)">
+            <td style="padding:8px 0"><span class="tag route">/my/employee/material-requests</span></td>
+            <td style="padding:8px;color:var(--ink2)">My material requests</td>
+            <td><span class="badge blue">Employee group</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border2)">
+            <td style="padding:8px 0"><span class="tag route">/my/employee/approvals</span></td>
+            <td style="padding:8px;color:var(--ink2)">Manager approvals center</td>
+            <td><span class="badge purple">Manager + roles</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0"><span class="tag route">/my/employee/attendance</span></td>
+            <td style="padding:8px;color:var(--ink2)">GPS check-in / check-out</td>
+            <td><span class="badge amber">Attendance group</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="callout blue">
+        <span class="callout-icon">ℹ️</span>
+        <span>The module overrides <code style="font-family:monospace;font-size:12px">/my</code> and <code style="font-family:monospace;font-size:12px">/my/home</code> routes — any user with a linked <code style="font-family:monospace;font-size:12px">hr.employee</code> record is automatically redirected to <code style="font-family:monospace;font-size:12px">/my/employee</code> instead of the standard Odoo customer portal.</span>
+      </div>
+    </section>
+
+    <!-- ======================== GROUPS ======================== -->
+    <section id="groups" class="section">
+      <h2 class="section-title">Security Groups</h2>
+      <p class="section-desc">The module defines 11 custom security groups across two categories: Employee Portal roles and Material Request approver roles.</p>
+
+      <h3 class="sub-title">Employee Portal roles</h3>
+      <div class="card">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Technical ID</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge blue">Employee Portal</span></td>
+              <td><span class="tag group">group_employee_portal</span></td>
+              <td style="color:var(--ink2)">Base group — grants portal access</td>
+            </tr>
+            <tr>
+              <td><span class="badge blue">Employee</span></td>
+              <td><span class="tag group">group_employee_portal_employee</span></td>
+              <td style="color:var(--ink2)">Can submit requests and view own records only (enforced by record rules)</td>
+            </tr>
+            <tr>
+              <td><span class="badge purple">Manager</span></td>
+              <td><span class="tag group">group_employee_portal_manager</span></td>
+              <td style="color:var(--ink2)">Can approve stage 1 of employee requests; sees subordinate requests and material requests pending their approval</td>
+            </tr>
+            <tr>
+              <td><span class="badge amber">HR</span></td>
+              <td><span class="tag group">group_employee_portal_hr</span></td>
+              <td style="color:var(--ink2)">Approves stage 2 of employee requests; reads all HR data</td>
+            </tr>
+            <tr>
+              <td><span class="badge amber">Finance</span></td>
+              <td><span class="tag group">group_employee_portal_finance</span></td>
+              <td style="color:var(--ink2)">Approves stage 3 of employee requests</td>
+            </tr>
+            <tr>
+              <td><span class="badge red">CEO</span></td>
+              <td><span class="tag group">group_employee_portal_ceo</span></td>
+              <td style="color:var(--ink2)">Final approval for both employee and material requests</td>
+            </tr>
+            <tr>
+              <td><span class="badge gray">Admin</span></td>
+              <td><span class="tag group">group_employee_portal_admin</span></td>
+              <td style="color:var(--ink2)">Full CRUD on all records, announcements, settings</td>
+            </tr>
+            <tr>
+              <td><span class="badge gray">Announcement Mgr</span></td>
+              <td><span class="tag group">group_employee_portal_announcement_manager</span></td>
+              <td style="color:var(--ink2)">Create, edit, delete portal announcements</td>
+            </tr>
+            <tr>
+              <td><span class="badge green">Attendance Only</span></td>
+              <td><span class="tag group">group_attendance_only</span></td>
+              <td style="color:var(--ink2)">Redirected straight to <code style="font-size:11px;font-family:monospace">/my/employee/attendance</code>; no access to anything else</td>
+            </tr>
+            <tr>
+              <td><span class="badge green">Attendance User</span></td>
+              <td><span class="tag group">group_portal_attendance_user</span></td>
+              <td style="color:var(--ink2)">Regular employees who can access the attendance page alongside other portal features</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub-title">Material Request approver roles</h3>
+      <div class="card">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Technical ID</th>
+              <th>Approves at stage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge blue">Purchase Rep</span></td>
+              <td><span class="tag group">group_mr_purchase_rep</span></td>
+              <td style="color:var(--ink2)">Stage 2 — <code style="font-size:11px;font-family:monospace">purchase</code> state</td>
+            </tr>
+            <tr>
+              <td><span class="badge purple">Store Manager</span></td>
+              <td><span class="tag group">group_mr_store_manager</span></td>
+              <td style="color:var(--ink2)">Stage 3 — <code style="font-size:11px;font-family:monospace">store</code> state (linked to project)</td>
+            </tr>
+            <tr>
+              <td><span class="badge amber">Project Manager</span></td>
+              <td><span class="tag group">group_mr_project_manager</span></td>
+              <td style="color:var(--ink2)">Stage 4 — <code style="font-size:11px;font-family:monospace">project_manager</code> state (linked to project)</td>
+            </tr>
+            <tr>
+              <td><span class="badge red">Projects Director</span></td>
+              <td><span class="tag group">group_mr_projects_director</span></td>
+              <td style="color:var(--ink2)">Stage 5 — <code style="font-size:11px;font-family:monospace">director</code> state</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub-title">How to assign groups in Odoo</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Navigate to Settings → Users</div>
+            <div class="step-desc">Go to <strong>Settings</strong> → <strong>Users &amp; Companies</strong> → <strong>Users</strong>. Open the target user's form.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Find the Employee Portal section</div>
+            <div class="step-desc">Scroll to the <strong>Employee Portal</strong> group category that the module adds. You'll see individual group checkboxes for each role.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Also ensure the user is a Portal user</div>
+            <div class="step-desc">For employees who use the portal (not the backend), their user type must be set to <code>Portal</code>. Backend users (HR, Finance, Admin) use <code>Internal User</code> type.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Link the user to an hr.employee record</div>
+            <div class="step-desc">Go to <strong>Employees</strong> → find or create the employee → in the <strong>HR Settings</strong> tab, set the <strong>Related User</strong>. Without this link, the portal redirect will not work and forms will raise an error.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout amber">
+        <span class="callout-icon">⚠️</span>
+        <span>A user assigned the <code style="font-size:12px;font-family:monospace">group_attendance_only</code> group will always be redirected directly to <code style="font-size:12px;font-family:monospace">/my/employee/attendance</code> — they cannot navigate to any other section of the portal. Assign this group only to workers who exclusively need clock-in/out access.</span>
+      </div>
+    </section>
+
+    <!-- ======================== ACCESS ======================== -->
+    <section id="access" class="section">
+      <h2 class="section-title">Access Permissions</h2>
+      <p class="section-desc">The module uses Odoo's standard CRUD access control (ir.model.access.csv) combined with record-level rules (ir.rule) to isolate data between users.</p>
+
+      <h3 class="sub-title">Employee Request — access matrix</h3>
+      <table class="perm-table">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th style="text-align:center">Read</th>
+            <th style="text-align:center">Write</th>
+            <th style="text-align:center">Create</th>
+            <th style="text-align:center">Delete</th>
+            <th>Record scope</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="color:var(--ink3);font-size:12px">Own records only (record rule)</td>
+          </tr>
+          <tr>
+            <td><span class="badge purple">Manager</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="color:var(--ink3);font-size:12px">Own requests + direct subordinates</td>
+          </tr>
+          <tr>
+            <td><span class="badge amber">HR</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="color:var(--ink3);font-size:12px">All records</td>
+          </tr>
+          <tr>
+            <td><span class="badge amber">Finance</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="color:var(--ink3);font-size:12px">All records</td>
+          </tr>
+          <tr>
+            <td><span class="badge red">CEO</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="color:var(--ink3);font-size:12px">All records</td>
+          </tr>
+          <tr>
+            <td><span class="badge gray">Admin</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="color:var(--ink3);font-size:12px">All records</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub-title">Material Request — access matrix</h3>
+      <table class="perm-table">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th style="text-align:center">Read</th>
+            <th style="text-align:center">Write</th>
+            <th style="text-align:center">Create</th>
+            <th style="text-align:center">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+          </tr>
+          <tr>
+            <td><span class="badge blue">Internal User (base)</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+          </tr>
+          <tr>
+            <td><span class="badge purple">Manager / Purchase Rep / Store Mgr / PM / Director / CEO</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="cross">–</td>
+            <td style="text-align:center" class="cross">–</td>
+          </tr>
+          <tr>
+            <td><span class="badge gray">Admin</span></td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+            <td style="text-align:center" class="check">✓</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub-title">Record isolation rules</h3>
+      <div class="card">
+        <p style="margin-bottom:12px">Three record-level rules (ir.rule) are defined to ensure data privacy:</p>
+        <div style="margin-bottom:10px">
+          <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px">1. Employee — own requests only</div>
+          <div class="code-block"><span class="ck">domain_force</span>: <span class="cv">[('employee_id.user_id', '=', user.id)]</span></div>
+          <div style="font-size:12.5px;color:var(--ink2)">Applied to both <code style="font-family:monospace;font-size:11px">employee.request</code> and <code style="font-family:monospace;font-size:11px">material.request</code> for the Employee group.</div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px">2. Manager — own + subordinates</div>
+          <div class="code-block"><span class="ck">domain_force</span>: <span class="cv">['|', ('manager_id.user_id', '=', user.id), ('employee_id.user_id', '=', user.id)]</span></div>
+          <div style="font-size:12.5px;color:var(--ink2)">Managers see requests where they are the direct manager OR where they are the requester. Applied to <code style="font-family:monospace;font-size:11px">employee.request</code> only.</div>
+        </div>
+      </div>
+
+      <div class="callout blue">
+        <span class="callout-icon">ℹ️</span>
+        <span>The <strong>Manager record rule</strong> relies on <code style="font-size:12px;font-family:monospace">manager_id</code> being correctly populated. This field is auto-computed from the employee's <strong>parent_id</strong> in the HR module. Make sure each employee has a "Manager" set in their employee record.</span>
+      </div>
+    </section>
+
+    <!-- ======================== BACKEND SETUP ======================== -->
+    <section id="backend-setup" class="section">
+      <h2 class="section-title">Backend Setup</h2>
+      <p class="section-desc">Steps to configure the module in the Odoo backend before going live.</p>
+
+      <h3 class="sub-title">Backend menus added by the module</h3>
+      <div class="card">
+        <p style="margin-bottom:12px">The module adds a top-level <strong>Employee Portal</strong> menu in the backend with three sub-items:</p>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">
+          <tr style="border-bottom:1px solid var(--border2)">
+            <td style="padding:8px 0;font-weight:600;color:var(--ink)">Employee Requests</td>
+            <td style="padding:8px;color:var(--ink2)">List/form view of all employee requests. Visible to all groups.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border2)">
+            <td style="padding:8px 0;font-weight:600;color:var(--ink)">Material Requests</td>
+            <td style="padding:8px;color:var(--ink2)">List/form view with Kanban dashboard. Visible to all groups.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;font-weight:600;color:var(--ink)">Announcements</td>
+            <td style="padding:8px;color:var(--ink2)">Visible only to <span class="badge gray">Announcement Manager</span> and <span class="badge gray">Admin</span> groups.</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3 class="sub-title">Other backend views added</h3>
+      <div class="grid-2">
+        <div class="card" style="padding:16px 20px">
+          <div class="card-title" style="margin-bottom:6px">Attendance views</div>
+          <p>Custom columns added to hr.attendance: <strong>Checked out outside location</strong> and <strong>Auto checked out</strong> flags are shown in the list view for HR monitoring.</p>
+        </div>
+        <div class="card" style="padding:16px 20px">
+          <div class="card-title" style="margin-bottom:6px">Work Location GPS fields</div>
+          <p>The Work Locations form (Employees → Configuration → Work Locations) gains GPS fields: Latitude, Longitude, Allowed Radius, and Enforce Geofencing toggle.</p>
+        </div>
+        <div class="card" style="padding:16px 20px">
+          <div class="card-title" style="margin-bottom:6px">Project → responsible employees</div>
+          <p>Each Project record gains two fields: <strong>Store Manager</strong> and <strong>Project Manager</strong> employee fields. These drive the Material Request approval routing.</p>
+        </div>
+        <div class="card" style="padding:16px 20px">
+          <div class="card-title" style="margin-bottom:6px">Purchase Order smart button</div>
+          <p>Material Requests show a smart button linking to associated Purchase Orders once a PO is created from the approved request.</p>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Request number sequences</h3>
+      <div class="card">
+        <p>Two automatic sequences are created on install:</p>
+        <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px;background:var(--surface2);padding:14px;border-radius:8px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink3);margin-bottom:6px">Employee Requests</div>
+            <div style="font-family:monospace;font-size:20px;font-weight:700;color:var(--accent)">ERQ/0001</div>
+            <div style="font-size:12px;color:var(--ink3);margin-top:4px">Sequence code: <code style="font-size:11px;font-family:monospace">employee.request.seq</code></div>
+          </div>
+          <div style="flex:1;min-width:200px;background:var(--surface2);padding:14px;border-radius:8px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink3);margin-bottom:6px">Material Requests</div>
+            <div style="font-family:monospace;font-size:20px;font-weight:700;color:var(--accent)">MR/0001</div>
+            <div style="font-size:12px;color:var(--ink3);margin-top:4px">Sequence code: <code style="font-size:11px;font-family:monospace">material.request.seq</code></div>
+          </div>
+        </div>
+        <p style="margin-top:12px;font-size:13px;color:var(--ink3)">To customize the prefix or padding, go to <strong>Settings → Technical → Sequences &amp; Identifiers → Sequences</strong> and search for the sequence codes above.</p>
+      </div>
+    </section>
+
+    <!-- ======================== WORK LOCATIONS ======================== -->
+    <section id="work-locations" class="section">
+      <h2 class="section-title">Work Locations &amp; GPS Configuration</h2>
+      <p class="section-desc">Each work location must be configured with GPS coordinates for geofencing to work. This controls where employees can check in and out from.</p>
+
+      <h3 class="sub-title">Fields on hr.work.location</h3>
+      <table class="perm-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">project_id</code></td>
+            <td><span class="badge blue">Many2one</span></td>
+            <td style="color:var(--ink2)">Required. Links this location to a project for Material Request routing.</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">geo_latitude</code></td>
+            <td><span class="badge gray">Float(10,7)</span></td>
+            <td style="color:var(--ink2)">GPS latitude of the work location center (e.g. 24.7136 for Riyadh).</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">geo_longitude</code></td>
+            <td><span class="badge gray">Float(10,7)</span></td>
+            <td style="color:var(--ink2)">GPS longitude of the work location center (e.g. 46.6753 for Riyadh).</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">geo_radius</code></td>
+            <td><span class="badge gray">Integer</span></td>
+            <td style="color:var(--ink2)">Allowed radius in metres (default: 200). Set to 0 to disable geofencing.</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">geo_enforce</code></td>
+            <td><span class="badge gray">Boolean</span></td>
+            <td style="color:var(--ink2)">Master switch. If False, employees can check in from anywhere regardless of radius.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub-title">How geofencing works</h3>
+      <div class="gps-card">
+        <div class="gps-viz">
+          <div class="gps-outer"></div>
+          <div class="gps-inner"></div>
+          <div class="gps-pin">📍</div>
+          <div class="gps-user-ok">👷</div>
+          <div class="gps-user-bad">👷</div>
+          <div class="gps-label-ok">✓ Within radius</div>
+          <div class="gps-label-bad">⚠ Outside radius</div>
+          <div class="gps-radius-label">radius = 200m</div>
+        </div>
+        <p style="font-size:13.5px;color:var(--ink2);line-height:1.65">The system uses the <strong>Haversine formula</strong> to calculate the great-circle distance between the employee's reported GPS position and the work location center. If the distance exceeds <code style="font-size:12px;font-family:monospace">geo_radius</code> AND <code style="font-size:12px;font-family:monospace">geo_enforce = True</code>, the check-in is blocked. Check-outs outside the radius are allowed but flagged with <code style="font-size:12px;font-family:monospace">checkout_outside_location = True</code> and HR is notified via an automated action.</p>
+      </div>
+
+      <h3 class="sub-title">Configuration steps</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Open the Work Location form</div>
+            <div class="step-desc">Go to <strong>Employees → Configuration → Work Locations</strong>. Create or edit a work location.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Set the linked Project</div>
+            <div class="step-desc">The <code>project_id</code> field is required. This links the location to the project for material request routing. Set it to the relevant project.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Enter GPS coordinates</div>
+            <div class="step-desc">Enter <code>geo_latitude</code> and <code>geo_longitude</code>. Use Google Maps — right-click on the site location and copy the coordinates. E.g. <code>24.7136, 46.6753</code>.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Set the allowed radius</div>
+            <div class="step-desc">Enter <code>geo_radius</code> in metres. For an office, 50–100m is typical. For a construction site, 200–500m may be appropriate depending on site size.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Enable enforcement</div>
+            <div class="step-desc">Check <strong>Enforce Geofencing</strong>. Without this, coordinates and radius are saved but not enforced — useful for setting up before going live.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Assign to employees</div>
+            <div class="step-desc">On each employee record, set their <strong>Work Location</strong> to this location. The attendance portal will then use this location's GPS settings for their check-ins.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <span class="callout-icon">✅</span>
+        <span>If <code style="font-size:12px;font-family:monospace">geo_latitude</code> and <code style="font-size:12px;font-family:monospace">geo_longitude</code> are both 0 (or not set), geofencing is bypassed even if <code style="font-size:12px;font-family:monospace">geo_enforce = True</code>. This prevents accidental lockouts during setup.</span>
+      </div>
+    </section>
+
+    <!-- ======================== PROJECTS ======================== -->
+    <section id="projects" class="section">
+      <h2 class="section-title">Projects Configuration</h2>
+      <p class="section-desc">Projects are central to Material Request routing. Each project must have a Store Manager and Project Manager assigned for the approval chain to work correctly.</p>
+
+      <h3 class="sub-title">Fields added to project.project</h3>
+      <table class="perm-table">
+        <thead>
+          <tr><th>Field</th><th>Description</th><th>Impact</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">store_manager_employee_id</code></td>
+            <td style="color:var(--ink2)">The employee who acts as Store Manager for this project</td>
+            <td style="color:var(--ink2)">Material requests in <code style="font-family:monospace;font-size:11px">store</code> state are routed to this person's linked user for approval</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">project_manager_employee_id</code></td>
+            <td style="color:var(--ink2)">The employee who acts as Project Manager for this project</td>
+            <td style="color:var(--ink2)">Material requests in <code style="font-family:monospace;font-size:11px">project_manager</code> state are routed to this person for approval</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout amber">
+        <span class="callout-icon">⚠️</span>
+        <span>If a project's <strong>Store Manager</strong> or <strong>Project Manager</strong> employee does not have a linked Odoo user (<code style="font-size:12px;font-family:monospace">employee.user_id</code>), the approval notification will fail silently — no email or activity will be created for that stage. Always verify the employee→user link.</span>
+      </div>
+
+      <h3 class="sub-title">How employee project link works</h3>
+      <div class="card">
+        <p style="margin-bottom:12px">When a Material Request is created, the system auto-fills the project from the employee's work location:</p>
+        <div class="code-block">
+<span class="cm"># Auto-computed on material.request</span>
+<span class="ck">project_id</span> = <span class="cv">compute("_compute_project_from_employee")</span>
+<span class="cm"># → reads employee_id.work_location_id.project_id</span>
+
+<span class="ck">store_manager_user_id</span> = <span class="cv">project.store_manager_employee_id.user_id</span>
+<span class="ck">project_manager_user_id</span> = <span class="cv">project.project_manager_employee_id.user_id</span>
+        </div>
+        <p style="font-size:13px;color:var(--ink2)">This chain means: Employee → Work Location → Project → Store Manager / Project Manager. All three links must be intact.</p>
+      </div>
+    </section>
+
+    <!-- ======================== ANNOUNCEMENTS ======================== -->
+    <section id="announcements" class="section">
+      <h2 class="section-title">Announcements</h2>
+      <p class="section-desc">Portal announcements appear as banners on the employee portal dashboard. They are managed from the backend by users with the Announcement Manager or Admin group.</p>
+
+      <h3 class="sub-title">Announcement fields</h3>
+      <table class="perm-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">name</code></td>
+            <td><span class="badge gray">Char</span></td>
+            <td style="color:var(--ink2)">Title of the announcement (required)</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">message</code></td>
+            <td><span class="badge blue">Html</span></td>
+            <td style="color:var(--ink2)">Rich-text body of the announcement (required)</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">active</code></td>
+            <td><span class="badge gray">Boolean</span></td>
+            <td style="color:var(--ink2)">Archive/unarchive to show/hide without deleting</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">sequence</code></td>
+            <td><span class="badge gray">Integer</span></td>
+            <td style="color:var(--ink2)">Display order — higher sequence appears first (default: 10)</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">start_date / end_date</code></td>
+            <td><span class="badge gray">Date</span></td>
+            <td style="color:var(--ink2)">Optional date range. Leave blank for a permanent announcement.</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">group_ids</code></td>
+            <td><span class="badge purple">Many2many</span></td>
+            <td style="color:var(--ink2)">Restrict visibility to specific security groups. Empty = visible to all portal users.</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">color</code></td>
+            <td><span class="badge gray">Selection</span></td>
+            <td style="color:var(--ink2)">Banner color: Blue (primary), Green (success), Yellow (warning), Red (danger)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout blue">
+        <span class="callout-icon">ℹ️</span>
+        <span>To create an announcement visible only to managers, set <strong>group_ids</strong> to <code style="font-size:12px;font-family:monospace">Employee Portal: Manager</code>. For company-wide announcements, leave group_ids empty.</span>
+      </div>
+    </section>
+
+    <!-- ======================== EMPLOYEE REQUESTS ======================== -->
+    <section id="employee-requests" class="section">
+      <h2 class="section-title">Employee Requests Workflow</h2>
+      <p class="section-desc">Employee requests follow a 5-stage approval chain from Draft through CEO approval. Each stage transition sends email notifications and creates Odoo activities for the next approver.</p>
+
+      <h3 class="sub-title">Approval flow</h3>
+      <div class="approval-flow">
+        <div class="af-node">
+          <div class="af-role">Employee</div>
+          <div class="af-box" style="background:#dbeafe;border:1px solid #93c5fd;color:#1e3a8a">Draft</div>
+          <div class="af-state">draft</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">Manager</div>
+          <div class="af-box" style="background:#ede9fe;border:1px solid #c4b5fd;color:#4c1d95">Manager</div>
+          <div class="af-state">manager</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">HR</div>
+          <div class="af-box" style="background:#fef3c7;border:1px solid #fcd34d;color:#78350f">HR</div>
+          <div class="af-state">hr</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">Finance</div>
+          <div class="af-box" style="background:#fef3c7;border:1px solid #fcd34d;color:#78350f">Finance</div>
+          <div class="af-state">finance</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">CEO</div>
+          <div class="af-box" style="background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d">CEO</div>
+          <div class="af-state">ceo</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">Final</div>
+          <div class="af-box" style="background:#d1fae5;border:1px solid #6ee7b7;color:#064e3b">Approved</div>
+          <div class="af-state">approved</div>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Request types</h3>
+      <div class="grid-3">
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">🏖 Leave Request</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">🏠 Housing Allowance</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">💰 Salary Advance</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">✈️ Business Travel</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">📚 Training Request</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">🏥 Medical Reimbursement</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">🌴 Vacation Settlement</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">💻 Asset / Equipment</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">📄 Letter Request</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">🏦 Bank Account Change</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">🔄 Position Transfer</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">🚪 End of Service</div>
+        <div style="background:var(--surface2);padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink2)">📝 Other</div>
+      </div>
+
+      <h3 class="sub-title">What gets tracked per approval stage</h3>
+      <div class="card">
+        <p style="margin-bottom:12px">For each stage, the system records:</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>
+            <strong>Approved by</strong> — the user who clicked Approve (stored in <code style="font-family:monospace;font-size:11px">manager_approved_by</code>, <code style="font-family:monospace;font-size:11px">hr_approved_by</code>, etc.)
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>
+            <strong>Approval date/time</strong> — timestamp stored as Datetime fields
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>
+            <strong>Comment</strong> — optional note entered by the approver at each stage
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--accent-4,#dc2626);flex-shrink:0"></span>
+            <strong>Rejection tracking</strong> — <code style="font-family:monospace;font-size:11px">state_before_reject</code> captures which stage the rejection happened at; <code style="font-family:monospace;font-size:11px">rejected_by</code> stores the user
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sub-title">PDF reports</h3>
+      <div class="callout green">
+        <span class="callout-icon">📄</span>
+        <span>Each approved or active request can be printed as a PDF. The report includes the request details, employee information, and the full approval history with timestamps and approver names. PDF generation is available from both the backend form view and the portal detail page.</span>
+      </div>
+    </section>
+
+    <!-- ======================== MATERIAL REQUESTS ======================== -->
+    <section id="material-requests" class="section">
+      <h2 class="section-title">Material Requests Workflow</h2>
+      <p class="section-desc">Material requests cover the procurement of goods or materials for a project. They follow a 6-stage approval chain and include quotation tracking, PO linking, and accounting document submission.</p>
+
+      <h3 class="sub-title">Approval flow</h3>
+      <div class="approval-flow" style="flex-wrap:wrap;gap:6px">
+        <div class="af-node">
+          <div class="af-role">Employee</div>
+          <div class="af-box" style="background:#dbeafe;border:1px solid #93c5fd;color:#1e3a8a;font-size:11px">Draft</div>
+          <div class="af-state">draft</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">Purchase Rep</div>
+          <div class="af-box" style="background:#ede9fe;border:1px solid #c4b5fd;color:#4c1d95;font-size:11px">Purchase</div>
+          <div class="af-state">purchase</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">Store Mgr</div>
+          <div class="af-box" style="background:#fef3c7;border:1px solid #fcd34d;color:#78350f;font-size:11px">Store</div>
+          <div class="af-state">store</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">Project Mgr</div>
+          <div class="af-box" style="background:#fef3c7;border:1px solid #fcd34d;color:#78350f;font-size:11px">PM</div>
+          <div class="af-state">project_manager</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">Director</div>
+          <div class="af-box" style="background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d;font-size:11px">Director</div>
+          <div class="af-state">director</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">CEO</div>
+          <div class="af-box" style="background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d;font-size:11px">CEO</div>
+          <div class="af-state">ceo</div>
+        </div>
+        <div class="af-arrow">→</div>
+        <div class="af-node">
+          <div class="af-role">Final</div>
+          <div class="af-box" style="background:#d1fae5;border:1px solid #6ee7b7;color:#064e3b;font-size:11px">Approved</div>
+          <div class="af-state">approved</div>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Quotation tracking</h3>
+      <div class="card">
+        <p style="margin-bottom:12px">The module tracks how many supplier quotations have been uploaded as attachments. The system requires 3 quotations before the request can proceed in the standard flow.</p>
+        <table class="perm-table" style="margin-top:0">
+          <thead><tr><th>Quotation count</th><th>Status displayed</th></tr></thead>
+          <tbody>
+            <tr><td>0 uploaded</td><td><span class="badge red">Pending Quotations</span></td></tr>
+            <tr><td>1 uploaded</td><td><span class="badge amber">Remaining 2 Quotations</span></td></tr>
+            <tr><td>2 uploaded</td><td><span class="badge amber">Remaining 1 Quotation</span></td></tr>
+            <tr><td>3+ uploaded</td><td><span class="badge green">Quotations Uploaded</span></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:13px;color:var(--ink2);margin-top:8px">Admins can override the quotation requirement using <strong>Quotation Status Override</strong> — set to <em>Exception Approved</em> or <em>Single Source Approved</em> to bypass the 3-quotation rule.</p>
+      </div>
+
+      <h3 class="sub-title">Post-approval features</h3>
+      <div class="grid-2">
+        <div class="card" style="padding:16px 20px">
+          <div class="card-title" style="margin-bottom:6px">Purchase Order linking</div>
+          <p>Once a PO is created referencing the Material Request, a smart button appears on the MR form. The <strong>No PO Required</strong> checkbox can be set if the purchase is too small to require a PO (e.g. petty cash).</p>
+        </div>
+        <div class="card" style="padding:16px 20px">
+          <div class="card-title" style="margin-bottom:6px">Invoice / accounting submission</div>
+          <p>After purchase, the portal user can upload accounting documents and submit them to accounting. The status tracks: Pending Invoice → Submitted → Received → Processed (or Rejected / Need More Docs).</p>
+        </div>
+        <div class="card" style="padding:16px 20px">
+          <div class="card-title" style="margin-bottom:6px">Clarification requests</div>
+          <p>Any approver can request clarification before approving. This pauses the workflow and shows a "Clarification" badge on the request. The requester responds and the approver resumes.</p>
+        </div>
+        <div class="card" style="padding:16px 20px">
+          <div class="card-title" style="margin-bottom:6px">Expense account</div>
+          <p>Admins and backend users can assign an <strong>Expense Account</strong> (filtered to expense account types) to the material request for accounting integration.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================== ATTENDANCE ======================== -->
+    <section id="attendance" class="section">
+      <h2 class="section-title">GPS Attendance</h2>
+      <p class="section-desc">Employees check in and out via the portal at <code style="font-family:monospace;font-size:12px;background:var(--surface3);padding:1px 5px;border-radius:4px">/my/employee/attendance</code>. The module extends Odoo's built-in hr.attendance model with GPS enforcement and auto-checkout.</p>
+
+      <h3 class="sub-title">Check-in / check-out flow</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Employee opens the attendance page</div>
+            <div class="step-desc">The browser requests the employee's GPS location via the Geolocation API. The employee must grant permission.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">System validates location against work location</div>
+            <div class="step-desc">The portal controller calls <code>work_location.check_employee_in_range(lat, lon)</code>. If <code>geo_enforce = True</code> and the employee is outside the radius, check-in is blocked with an error message.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Attendance record is created</div>
+            <div class="step-desc">A new <code>hr.attendance</code> record is created with <code>check_in</code> set to the current UTC timestamp. The portal context key <code>from_portal_checkout=True</code> is set so the auto-checkout flag is NOT triggered.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-body">
+            <div class="step-title">Check-out: location re-validated</div>
+            <div class="step-desc">On checkout, location is checked again. If outside radius, checkout is still recorded (not blocked) but <code>checkout_outside_location = True</code> is set on the record and HR is notified via an automated action.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Auto-checkout cron</h3>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon amber">⏰</div>
+          <div>
+            <div class="card-title">Daily auto-checkout at 11:50 PM Riyadh time</div>
+            <div class="card-sub">Cron: Employee Portal: Auto Check-Out Open Attendances</div>
+          </div>
+        </div>
+        <p>Runs daily at <strong>20:50 UTC</strong> (= 23:50 Asia/Riyadh). Closes all attendance records that are still open (no check_out) from earlier that day.</p>
+        <div style="margin-top:12px;font-size:13px;color:var(--ink2)">
+          <div style="display:flex;gap:8px;margin-bottom:6px"><span style="color:var(--accent3);font-weight:600">Why custom?</span> Odoo's built-in auto-checkout skips employees with no work schedule or a flexible schedule. Portal-only employees typically have no schedule and are ignored by the native cron. This custom cron applies to ALL employees.</div>
+          <div style="display:flex;gap:8px"><span style="color:var(--accent3);font-weight:600">Detection:</span> Auto-closed records are flagged with <code style="font-size:11px;font-family:monospace">auto_checked_out = True</code> and a chatter note is posted. HR staff can filter for these records in the Attendance backend view.</div>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Flags on attendance records</h3>
+      <table class="perm-table">
+        <thead><tr><th>Field</th><th>Set when</th><th>HR action</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">checkout_outside_location</code></td>
+            <td style="color:var(--ink2)">Employee checks out from outside the allowed GPS radius</td>
+            <td style="color:var(--ink2)">Automated action posts a chatter note; HR can filter these records</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:monospace;font-size:12px">auto_checked_out</code></td>
+            <td style="color:var(--ink2)">The daily cron closes an open attendance record</td>
+            <td style="color:var(--ink2)">Chatter note posted; filter in Attendance list view</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================== PORTAL EMPLOYEE ======================== -->
+    <section id="portal-employee" class="section">
+      <h2 class="section-title">Employee Portal — What Users Can Do</h2>
+      <p class="section-desc">This section describes what a user with the <strong>Employee Portal: Employee</strong> group sees and can do in the portal at <code style="font-family:monospace;font-size:12px;background:var(--surface3);padding:1px 5px;border-radius:4px">/my/employee</code>.</p>
+
+      <h3 class="sub-title">Dashboard (home page)</h3>
+      <div class="card">
+        <p style="margin-bottom:12px">The dashboard at <code style="font-family:monospace;font-size:12px">/my/employee</code> shows summary cards for:</p>
+        <div class="grid-2" style="margin-bottom:0">
+          <div style="background:var(--surface2);padding:14px;border-radius:8px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink3)">My Requests</div>
+            <div style="font-size:22px;font-weight:700;color:var(--accent)">Count</div>
+            <div style="font-size:12px;color:var(--ink3)">Total employee requests submitted</div>
+          </div>
+          <div style="background:var(--surface2);padding:14px;border-radius:8px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink3)">My Material Requests</div>
+            <div style="font-size:22px;font-weight:700;color:var(--accent)">Count</div>
+            <div style="font-size:12px;color:var(--ink3)">Total material requests submitted</div>
+          </div>
+          <div style="background:var(--surface2);padding:14px;border-radius:8px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink3)">Pending Approvals</div>
+            <div style="font-size:22px;font-weight:700;color:var(--accent5)">Count</div>
+            <div style="font-size:12px;color:var(--ink3)">Requests awaiting your approval action (manager/approver users)</div>
+          </div>
+          <div style="background:var(--surface2);padding:14px;border-radius:8px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink3)">Documents to Sign</div>
+            <div style="font-size:22px;font-weight:700;color:var(--accent2)">Count</div>
+            <div style="font-size:12px;color:var(--ink3)">Pending Odoo Sign requests assigned to this user</div>
+          </div>
+        </div>
+        <p style="margin-top:14px;font-size:13px;color:var(--ink2)">A <strong>Recent Activity</strong> feed shows the last 5 employee requests and last 5 material requests for this employee, with status badges.</p>
+      </div>
+
+      <h3 class="sub-title">Employee Request actions</h3>
+      <table class="perm-table">
+        <thead><tr><th>Action</th><th>Available to</th><th>Details</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Submit new request</td>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="color:var(--ink2)">Dynamic form at <code style="font-family:monospace;font-size:11px">/my/employee/requests/new</code> — employee auto-filled; choose request type and fill details</td>
+          </tr>
+          <tr>
+            <td>View my requests</td>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="color:var(--ink2)">Filterable/paginated list at <code style="font-family:monospace;font-size:11px">/my/employee/requests</code> — own records only</td>
+          </tr>
+          <tr>
+            <td>View request detail</td>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="color:var(--ink2)">Full approval timeline with each approver's name, date, and comment</td>
+          </tr>
+          <tr>
+            <td>Download PDF</td>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="color:var(--ink2)">Available on the detail page for any request</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub-title">Material Request actions</h3>
+      <table class="perm-table">
+        <thead><tr><th>Action</th><th>Available to</th><th>Details</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Submit new MR</td>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="color:var(--ink2)">Form with worksite, delivery date, and materials line table. Project auto-filled from work location.</td>
+          </tr>
+          <tr>
+            <td>View my MRs</td>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="color:var(--ink2)">Own records only; shows status, quotation count, PO status</td>
+          </tr>
+          <tr>
+            <td>Upload quotations</td>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="color:var(--ink2)">Upload supplier quotation PDFs directly on the MR detail page. System counts and tracks them.</td>
+          </tr>
+          <tr>
+            <td>Submit accounting docs</td>
+            <td><span class="badge blue">Employee</span></td>
+            <td style="color:var(--ink2)">After approval, upload invoices/receipts and submit to accounting. Status tracks through the accounting review.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================== PORTAL MANAGER ======================== -->
+    <section id="portal-manager" class="section">
+      <h2 class="section-title">Manager Approvals Center</h2>
+      <p class="section-desc">Users with Manager or approver role groups see an additional Approvals section in the portal. This is the unified center for processing pending requests.</p>
+
+      <h3 class="sub-title">What managers/approvers can do</h3>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon purple">📋</div>
+            <div>
+              <div class="card-title">Employee Approvals list</div>
+              <div class="card-sub">/my/employee/approvals</div>
+            </div>
+          </div>
+          <p>Shows all pending employee requests at the approver's current stage. Managers see requests where they are the direct manager. HR/Finance/CEO see all requests at their respective stage.</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon amber">📦</div>
+            <div>
+              <div class="card-title">Material Approvals list</div>
+              <div class="card-sub">/my/employee/material-approvals</div>
+            </div>
+          </div>
+          <p>Shows Material Requests pending the approver's action. Purchase Reps, Store Managers, and Project Managers see only requests routed to them. Director and CEO see all.</p>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Approval actions on the detail page</h3>
+      <table class="perm-table">
+        <thead><tr><th>Action</th><th>Who can use it</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="badge green">Approve</span></td>
+            <td style="color:var(--ink2)">The approver whose stage is currently active</td>
+            <td style="color:var(--ink2)">Advances state to next stage; records approver name, date, and comment; notifies next approver</td>
+          </tr>
+          <tr>
+            <td><span class="badge red">Reject</span></td>
+            <td style="color:var(--ink2)">Any active stage approver</td>
+            <td style="color:var(--ink2)">Sets state to Rejected; records which stage it was rejected at and by whom</td>
+          </tr>
+          <tr>
+            <td><span class="badge amber">Request Clarification</span></td>
+            <td style="color:var(--ink2)">Material Request approvers</td>
+            <td style="color:var(--ink2)">Pauses workflow; marks request with a Clarification flag at the current stage</td>
+          </tr>
+          <tr>
+            <td><span class="badge blue">Add comment</span></td>
+            <td style="color:var(--ink2)">All approvers</td>
+            <td style="color:var(--ink2)">Free-text comment stored on the stage; visible in the approval timeline to all parties</td>
+          </tr>
+          <tr>
+            <td><span class="badge blue">Sign documents</span></td>
+            <td style="color:var(--ink2)">All portal users</td>
+            <td style="color:var(--ink2)">Pending Odoo Sign requests listed at <code style="font-family:monospace;font-size:11px">/my/employee/sign</code>; opens clean signing interface</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout blue">
+        <span class="callout-icon">ℹ️</span>
+        <span>For Material Requests, the <strong>Store Manager</strong> and <strong>Project Manager</strong> approval is project-specific — the system compares the request's project with the approver's assigned project. A Store Manager for Project A will NOT see requests from Project B.</span>
+      </div>
+    </section>
+
+    <!-- ======================== AUTOMATION ======================== -->
+    <section id="automation" class="section">
+      <h2 class="section-title">Automation &amp; Scheduled Actions</h2>
+      <p class="section-desc">The module installs two automated processes that run without any manual intervention.</p>
+
+      <h3 class="sub-title">1. Daily auto-checkout cron</h3>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon amber">⏰</div>
+          <div>
+            <div class="card-title">Auto Check-Out Open Attendances</div>
+            <div class="card-sub">Runs every day at 20:50 UTC (23:50 Riyadh time)</div>
+          </div>
+        </div>
+        <p style="margin-bottom:12px">Finds all open <code style="font-family:monospace;font-size:12px">hr.attendance</code> records (no check_out) from earlier that day and closes them at the moment the cron runs.</p>
+        <div style="background:var(--surface2);border-radius:8px;padding:14px;font-size:13px;color:var(--ink2)">
+          <div style="font-weight:600;color:var(--ink);margin-bottom:6px">To adjust the cron schedule:</div>
+          Go to <strong>Settings → Technical → Automation → Scheduled Actions</strong> → find <em>Employee Portal: Auto Check-Out Open Attendances</em> → change the Next Execution Time or interval.
+        </div>
+      </div>
+
+      <h3 class="sub-title">2. Outside-location checkout notification</h3>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon red">🚨</div>
+          <div>
+            <div class="card-title">Notify HR on Outside-Location Check-out</div>
+            <div class="card-sub">Triggered when checkout_outside_location flips to True</div>
+          </div>
+        </div>
+        <p>This is an Odoo Automated Action (base_automation) — not a cron. It fires immediately whenever <code style="font-family:monospace;font-size:12px">checkout_outside_location</code> changes from False to True on an attendance record. It calls <code style="font-family:monospace;font-size:12px">_notify_hr_outside_checkout()</code> which posts an internal chatter note on the attendance record, visible to HR in the backend.</p>
+        <div class="callout amber" style="margin-top:12px">
+          <span class="callout-icon">⚠️</span>
+          <span>This automated action is active by default. To disable it (e.g. if you don't want HR notifications on out-of-area checkouts), go to <strong>Settings → Technical → Automation → Automated Actions</strong> → find the action and uncheck <em>Active</em>.</span>
+        </div>
+      </div>
+
+      <h3 class="sub-title">Notifications &amp; activities summary</h3>
+      <table class="perm-table">
+        <thead><tr><th>Trigger</th><th>Notification sent to</th><th>Method</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Employee submits request</td>
+            <td style="color:var(--ink2)">Direct manager (stage 1 approver)</td>
+            <td style="color:var(--ink2)">Email + Odoo activity created</td>
+          </tr>
+          <tr>
+            <td>Manager approves</td>
+            <td style="color:var(--ink2)">All users in HR group</td>
+            <td style="color:var(--ink2)">Email + Odoo activity created</td>
+          </tr>
+          <tr>
+            <td>HR approves</td>
+            <td style="color:var(--ink2)">All users in Finance group</td>
+            <td style="color:var(--ink2)">Email + Odoo activity created</td>
+          </tr>
+          <tr>
+            <td>Finance approves</td>
+            <td style="color:var(--ink2)">All users in CEO group</td>
+            <td style="color:var(--ink2)">Email + Odoo activity created</td>
+          </tr>
+          <tr>
+            <td>Final approval / rejection</td>
+            <td style="color:var(--ink2)">Original requester</td>
+            <td style="color:var(--ink2)">Email notification</td>
+          </tr>
+          <tr>
+            <td>Outside-location checkout</td>
+            <td style="color:var(--ink2)">HR chatter note (internal)</td>
+            <td style="color:var(--ink2)">Automated action → chatter</td>
+          </tr>
+          <tr>
+            <td>Auto-checkout by cron</td>
+            <td style="color:var(--ink2)">HR chatter note on attendance record</td>
+            <td style="color:var(--ink2)">Cron → chatter note posted</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
