@@ -27,8 +27,11 @@
 
     This module enables a complete self-service environment for employees and a unified approval center for managers.
     """,
-    'license': 'LGPL-3',
-    'author': 'Kinan',
+    "author": "Kinan",
+    "website": "https://absar-alomran.com",
+    "license": "OPL-1",
+    "price": 249.99,
+    "currency": "USD",
     'category': 'Human Resources',
     'application': True,
     'installable': True,
