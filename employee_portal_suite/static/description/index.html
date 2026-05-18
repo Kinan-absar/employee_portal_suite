@@ -1,0 +1,425 @@
+<!-- Employee Portal Suite — Odoo App Store Description -->
+<section style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f1f2e; font-size: 14px; line-height: 1.7; max-width: 860px;">
+
+  <!-- INTRO -->
+  <p style="font-size: 16px; color: #374151; margin: 0 0 24px;">
+    <strong>Employee Portal Suite</strong> creates a complete self-service employee environment inside the Odoo portal at <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 13px;">/my/employee</code>. Employees can submit requests, track approvals, manage material requisitions, clock in/out with GPS enforcement, sign documents, and read company announcements — all without backend access.
+  </p>
+<div>
+    <strong>📘 Full Documentation</strong><br/>
+    https://kinan-absar.github.io/absar/memos/employee_portal_suite_docs.html
+</div>
+  <!-- STATS STRIP -->
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 32px;">
+    <tr>
+      <td style="text-align: center; padding: 18px 12px; border-right: 1px solid #e5e7eb;">
+        <div style="font-size: 28px; font-weight: 700; color: #2563eb; line-height: 1;">13</div>
+        <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Request types</div>
+      </td>
+      <td style="text-align: center; padding: 18px 12px; border-right: 1px solid #e5e7eb;">
+        <div style="font-size: 28px; font-weight: 700; color: #2563eb; line-height: 1;">5</div>
+        <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Employee request stages</div>
+      </td>
+      <td style="text-align: center; padding: 18px 12px; border-right: 1px solid #e5e7eb;">
+        <div style="font-size: 28px; font-weight: 700; color: #2563eb; line-height: 1;">6</div>
+        <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Material request stages</div>
+      </td>
+      <td style="text-align: center; padding: 18px 12px;">
+        <div style="font-size: 28px; font-weight: 700; color: #2563eb; line-height: 1;">11</div>
+        <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Security groups</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ===== FEATURES ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Key Features</h2>
+
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 32px;">
+    <tr>
+      <td style="width: 50%; vertical-align: top; padding: 0 12px 16px 0;">
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+          <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 6px;">📋 Employee Requests</div>
+          <div style="font-size: 13px; color: #6b7280;">Multi-level approval workflow (Manager → HR → Finance → CEO) for 13 request types. Each stage sends email notifications and logs the approver, timestamp, and comment.</div>
+        </div>
+      </td>
+      <td style="width: 50%; vertical-align: top; padding: 0 0 16px 0;">
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+          <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 6px;">📦 Material Requests</div>
+          <div style="font-size: 13px; color: #6b7280;">6-stage procurement workflow linked to employee projects. Tracks quotations, PO status, supplier invoices, and receipt uploads through to accounting sign-off.</div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; padding: 0 12px 16px 0;">
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+          <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 6px;">📍 GPS Attendance</div>
+          <div style="font-size: 13px; color: #6b7280;">Geofenced check-in/check-out via the browser Geolocation API. Per-location configurable radius, Haversine distance validation, auto-checkout cron at 23:50 Riyadh time, and out-of-range HR notifications.</div>
+        </div>
+      </td>
+      <td style="vertical-align: top; padding: 0 0 16px 0;">
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+          <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 6px;">✍️ Document Signing</div>
+          <div style="font-size: 13px; color: #6b7280;">Pending Odoo Sign requests surface on the employee portal dashboard at <code style="background: #e5e7eb; padding: 1px 5px; border-radius: 3px; font-size: 11px;">/my/employee/sign</code>. Employees complete signatures without backend access.</div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; padding: 0 12px 0 0;">
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+          <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 6px;">📢 Announcements</div>
+          <div style="font-size: 13px; color: #6b7280;">Portal announcement banners managed from the backend. Supports rich-text content, date ranges, display order, group-based visibility targeting, and color-coded alert types.</div>
+        </div>
+      </td>
+      <td style="vertical-align: top;">
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+          <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 6px;">🔒 11 Security Groups</div>
+          <div style="font-size: 13px; color: #6b7280;">Granular roles: Employee, Manager, HR, Finance, CEO, Admin, Announcement Manager, Attendance Only, and project-specific Material Request approver roles (Purchase Rep, Store Manager, Project Manager, Director).</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ===== URL ROUTES ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Portal URL Routes</h2>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 32px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+    <thead>
+      <tr style="background: #f3f4f6;">
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Route</th>
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Description</th>
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Access</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 9px 14px;"><code style="background: #f3e8ff; color: #6d28d9; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/my/employee</code></td>
+        <td style="padding: 9px 14px; color: #374151;">Main portal dashboard</td>
+        <td style="padding: 9px 14px;"><span style="background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">All portal users</span></td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 9px 14px;"><code style="background: #f3e8ff; color: #6d28d9; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/my/employee/requests</code></td>
+        <td style="padding: 9px 14px; color: #374151;">My employee requests list</td>
+        <td style="padding: 9px 14px;"><span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Employee group</span></td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 9px 14px;"><code style="background: #f3e8ff; color: #6d28d9; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/my/employee/material-requests</code></td>
+        <td style="padding: 9px 14px; color: #374151;">My material requests</td>
+        <td style="padding: 9px 14px;"><span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Employee group</span></td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 9px 14px;"><code style="background: #f3e8ff; color: #6d28d9; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/my/employee/approvals</code></td>
+        <td style="padding: 9px 14px; color: #374151;">Manager approvals center</td>
+        <td style="padding: 9px 14px;"><span style="background: #ede9fe; color: #5b21b6; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Manager + roles</span></td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 9px 14px;"><code style="background: #f3e8ff; color: #6d28d9; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/my/employee/attendance</code></td>
+        <td style="padding: 9px 14px; color: #374151;">GPS check-in / check-out</td>
+        <td style="padding: 9px 14px;"><span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Attendance group</span></td>
+      </tr>
+      <tr>
+        <td style="padding: 9px 14px;"><code style="background: #f3e8ff; color: #6d28d9; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/my/employee/sign</code></td>
+        <td style="padding: 9px 14px; color: #374151;">Pending document signatures</td>
+        <td style="padding: 9px 14px;"><span style="background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">All portal users</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== EMPLOYEE REQUEST WORKFLOW ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Employee Request Workflow</h2>
+
+  <p style="font-size: 13px; color: #374151; margin: 0 0 12px;">Requests follow a 5-stage approval chain. Each transition sends email notifications and creates Odoo activities for the next approver.</p>
+
+  <!-- Approval flow — text representation for compatibility -->
+  <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; font-size: 12px;">
+    <span style="background: #dbeafe; border: 1px solid #93c5fd; color: #1e3a8a; padding: 5px 12px; border-radius: 6px; font-weight: 500;">Draft</span>
+    <span style="color: #9ca3af; padding: 0 4px;">→</span>
+    <span style="background: #ede9fe; border: 1px solid #c4b5fd; color: #4c1d95; padding: 5px 12px; border-radius: 6px; font-weight: 500;">Manager</span>
+    <span style="color: #9ca3af; padding: 0 4px;">→</span>
+    <span style="background: #fef3c7; border: 1px solid #fcd34d; color: #78350f; padding: 5px 12px; border-radius: 6px; font-weight: 500;">HR</span>
+    <span style="color: #9ca3af; padding: 0 4px;">→</span>
+    <span style="background: #fef3c7; border: 1px solid #fcd34d; color: #78350f; padding: 5px 12px; border-radius: 6px; font-weight: 500;">Finance</span>
+    <span style="color: #9ca3af; padding: 0 4px;">→</span>
+    <span style="background: #fee2e2; border: 1px solid #fca5a5; color: #7f1d1d; padding: 5px 12px; border-radius: 6px; font-weight: 500;">CEO</span>
+    <span style="color: #9ca3af; padding: 0 4px;">→</span>
+    <span style="background: #d1fae5; border: 1px solid #6ee7b7; color: #064e3b; padding: 5px 12px; border-radius: 6px; font-weight: 500;">Approved ✓</span>
+  </div>
+
+  <p style="font-size: 13px; color: #374151; margin: 0 0 8px;"><strong>Supported request types:</strong></p>
+  <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 32px;">
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">🏖 Leave Request</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">🏠 Housing Allowance</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">💰 Salary Advance</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">✈️ Business Travel</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">📚 Training Request</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">🏥 Medical Reimbursement</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">🌴 Vacation Settlement</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">💻 Asset / Equipment</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">📄 Letter Request</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">🏦 Bank Account Change</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">🔄 Position Transfer</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">🚪 End of Service</span>
+    <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 6px; font-size: 12px;">📝 Other</span>
+  </div>
+
+  <!-- ===== MATERIAL REQUEST WORKFLOW ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Material Request Workflow</h2>
+
+  <p style="font-size: 13px; color: #374151; margin: 0 0 12px;">Material requests are linked to the employee's work location project and pass through 6 stages with project-specific approvers.</p>
+
+  <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; font-size: 11px;">
+    <div style="text-align: center;">
+      <div style="color: #6b7280; font-size: 10px; margin-bottom: 3px;">Employee</div>
+      <span style="background: #dbeafe; border: 1px solid #93c5fd; color: #1e3a8a; padding: 4px 10px; border-radius: 6px; font-weight: 500; display: inline-block;">Draft</span>
+    </div>
+    <span style="color: #9ca3af; padding: 0 4px; margin-top: 14px;">→</span>
+    <div style="text-align: center;">
+      <div style="color: #6b7280; font-size: 10px; margin-bottom: 3px;">Purchase Rep</div>
+      <span style="background: #dbeafe; border: 1px solid #93c5fd; color: #1e3a8a; padding: 4px 10px; border-radius: 6px; font-weight: 500; display: inline-block;">Purchase</span>
+    </div>
+    <span style="color: #9ca3af; padding: 0 4px; margin-top: 14px;">→</span>
+    <div style="text-align: center;">
+      <div style="color: #6b7280; font-size: 10px; margin-bottom: 3px;">Store Mgr</div>
+      <span style="background: #ede9fe; border: 1px solid #c4b5fd; color: #4c1d95; padding: 4px 10px; border-radius: 6px; font-weight: 500; display: inline-block;">Store</span>
+    </div>
+    <span style="color: #9ca3af; padding: 0 4px; margin-top: 14px;">→</span>
+    <div style="text-align: center;">
+      <div style="color: #6b7280; font-size: 10px; margin-bottom: 3px;">Project Mgr</div>
+      <span style="background: #fef3c7; border: 1px solid #fcd34d; color: #78350f; padding: 4px 10px; border-radius: 6px; font-weight: 500; display: inline-block;">Proj. Mgr</span>
+    </div>
+    <span style="color: #9ca3af; padding: 0 4px; margin-top: 14px;">→</span>
+    <div style="text-align: center;">
+      <div style="color: #6b7280; font-size: 10px; margin-bottom: 3px;">Director</div>
+      <span style="background: #fef3c7; border: 1px solid #fcd34d; color: #78350f; padding: 4px 10px; border-radius: 6px; font-weight: 500; display: inline-block;">Director</span>
+    </div>
+    <span style="color: #9ca3af; padding: 0 4px; margin-top: 14px;">→</span>
+    <div style="text-align: center;">
+      <div style="color: #6b7280; font-size: 10px; margin-bottom: 3px;">CEO</div>
+      <span style="background: #fee2e2; border: 1px solid #fca5a5; color: #7f1d1d; padding: 4px 10px; border-radius: 6px; font-weight: 500; display: inline-block;">CEO</span>
+    </div>
+    <span style="color: #9ca3af; padding: 0 4px; margin-top: 14px;">→</span>
+    <div style="text-align: center;">
+      <div style="color: #6b7280; font-size: 10px; margin-bottom: 3px;">Final</div>
+      <span style="background: #d1fae5; border: 1px solid #6ee7b7; color: #064e3b; padding: 4px 10px; border-radius: 6px; font-weight: 500; display: inline-block;">Approved</span>
+    </div>
+  </div>
+
+  <p style="font-size: 13px; color: #374151; margin: 0 0 32px;">Store Manager and Project Manager approvals are <strong>project-specific</strong> — approvers only see requests belonging to their assigned project. Quotation uploads, PO tracking, and post-approval accounting document submission are all handled directly from the portal.</p>
+
+  <!-- ===== GPS ATTENDANCE ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">GPS Attendance</h2>
+
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 32px;">
+    <tr>
+      <td style="width: 50%; vertical-align: top; padding: 0 12px 0 0; font-size: 13px; color: #374151;">
+        <p style="margin: 0 0 12px;"><strong>How it works:</strong> The browser requests the employee's GPS position. The server uses the <strong>Haversine formula</strong> to measure the distance from the work location center. If <code style="background: #f3f4f6; padding: 1px 5px; border-radius: 3px;">geo_enforce = True</code> and the distance exceeds the configured radius, check-in is blocked.</p>
+        <p style="margin: 0;">Check-outs from outside the radius are allowed but flagged with <code style="background: #f3f4f6; padding: 1px 5px; border-radius: 3px;">checkout_outside_location = True</code> — HR receives an automatic chatter notification.</p>
+      </td>
+      <td style="width: 50%; vertical-align: top; padding: 0;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+          <thead>
+            <tr style="background: #f3f4f6;">
+              <th style="text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Field</th>
+              <th style="text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #f3f4f6;">
+              <td style="padding: 7px 12px;"><code style="font-size: 11px; background: #f3f4f6; padding: 1px 4px; border-radius: 3px;">geo_latitude</code></td>
+              <td style="padding: 7px 12px; color: #6b7280;">Location center latitude</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f3f4f6;">
+              <td style="padding: 7px 12px;"><code style="font-size: 11px; background: #f3f4f6; padding: 1px 4px; border-radius: 3px;">geo_longitude</code></td>
+              <td style="padding: 7px 12px; color: #6b7280;">Location center longitude</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f3f4f6;">
+              <td style="padding: 7px 12px;"><code style="font-size: 11px; background: #f3f4f6; padding: 1px 4px; border-radius: 3px;">geo_radius</code></td>
+              <td style="padding: 7px 12px; color: #6b7280;">Allowed radius in metres (default 200)</td>
+            </tr>
+            <tr>
+              <td style="padding: 7px 12px;"><code style="font-size: 11px; background: #f3f4f6; padding: 1px 4px; border-radius: 3px;">geo_enforce</code></td>
+              <td style="padding: 7px 12px; color: #6b7280;">Master enforcement switch</td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ===== SECURITY GROUPS ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Security Groups</h2>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+    <thead>
+      <tr style="background: #f3f4f6;">
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Group</th>
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Technical ID</th>
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Employee</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_employee_portal_employee</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Submit requests; view own records only</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #ede9fe; color: #5b21b6; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Manager</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_employee_portal_manager</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Approves stage 1; sees subordinate requests</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">HR</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_employee_portal_hr</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Approves stage 2; reads all HR data</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Finance</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_employee_portal_finance</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Approves stage 3</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">CEO</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_employee_portal_ceo</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Final approval for both request types</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Admin</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_employee_portal_admin</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Full CRUD on all records, settings</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Attendance Only</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_attendance_only</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Redirected straight to attendance page; no other portal access</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Purchase Rep</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_mr_purchase_rep</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Material request stage 2 approval</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #ede9fe; color: #5b21b6; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Store Manager</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_mr_store_manager</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Stage 3 — project-specific</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px;"><span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Project Manager</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_mr_project_manager</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Stage 4 — project-specific</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 14px;"><span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">Projects Director</span></td>
+        <td style="padding: 8px 14px;"><code style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px;">group_mr_projects_director</code></td>
+        <td style="padding: 8px 14px; color: #6b7280;">Stage 5 approval</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== AUTOMATION ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Automation &amp; Scheduled Actions</h2>
+
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 32px;">
+    <tr>
+      <td style="width: 50%; vertical-align: top; padding: 0 12px 0 0;">
+        <div style="background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; color: #78350f;">
+          <strong>⏰ Daily Auto-Checkout Cron</strong><br>
+          <span style="color: #92400e;">Runs at 20:50 UTC (23:50 Riyadh time) — closes all open attendance records from that day. Unlike Odoo's built-in cron, this applies to employees with no work schedule (portal-only users). Auto-closed records are flagged with <code style="font-size: 11px;">auto_checked_out = True</code>.</span>
+        </div>
+      </td>
+      <td style="width: 50%; vertical-align: top;">
+        <div style="background: #fef2f2; border-left: 3px solid #ef4444; border-radius: 6px; padding: 14px 16px; font-size: 13px; color: #7f1d1d;">
+          <strong>🚨 Outside-Location Checkout Alert</strong><br>
+          <span style="color: #991b1b;">Automated Action (base_automation) that fires immediately when <code style="font-size: 11px;">checkout_outside_location</code> flips to True. Posts an internal chatter note on the attendance record, visible to HR in the backend.</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ===== NOTIFICATION SUMMARY ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Notifications Summary</h2>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 32px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+    <thead>
+      <tr style="background: #f3f4f6;">
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Trigger</th>
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Notified</th>
+        <th style="text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Method</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px; color: #374151;">Employee submits request</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Direct manager</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Email + Odoo activity</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px; color: #374151;">Manager approves</td>
+        <td style="padding: 8px 14px; color: #6b7280;">All HR group users</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Email + Odoo activity</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px; color: #374151;">HR approves</td>
+        <td style="padding: 8px 14px; color: #6b7280;">All Finance group users</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Email + Odoo activity</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px; color: #374151;">Finance approves</td>
+        <td style="padding: 8px 14px; color: #6b7280;">All CEO group users</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Email + Odoo activity</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px; color: #374151;">Final approval / rejection</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Original requester</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Email notification</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 8px 14px; color: #374151;">Outside-location checkout</td>
+        <td style="padding: 8px 14px; color: #6b7280;">HR (internal)</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Chatter note on attendance record</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 14px; color: #374151;">Auto-checkout by cron</td>
+        <td style="padding: 8px 14px; color: #6b7280;">HR (internal)</td>
+        <td style="padding: 8px 14px; color: #6b7280;">Chatter note on attendance record</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== DEPENDENCIES ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Module Dependencies</h2>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 32px;">
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">base</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">web</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">portal</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">hr</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">mail</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">hr_attendance</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">base_automation</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">website</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">purchase</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">sign</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">project</span>
+    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">account</span>
+  </div>
+
+  <!-- ===== CONFIGURATION NOTES ===== -->
+  <h2 style="font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">Configuration Notes</h2>
+
+  <div style="background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 6px; padding: 14px 16px; font-size: 13px; color: #1e3a8a; margin-bottom: 10px;">
+    <strong>ℹ️ Employee → User link required:</strong> Each employee must have a <strong>Related User</strong> set in their HR Settings tab. Without this link, portal redirects and approval notifications will fail.
+  </div>
+
+  <div style="background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; color: #78350f; margin-bottom: 10px;">
+    <strong>⚠️ Attendance Only group:</strong> Users with <code style="font-size: 11px;">group_attendance_only</code> are always redirected to <code style="font-size: 11px;">/my/employee/attendance</code> and cannot access any other portal section. Assign only to clock-in/out-only workers.
+  </div>
+
+  <div style="background: #f0fdf4; border-left: 3px solid #22c55e; border-radius: 6px; padding: 14px 16px; font-size: 13px; color: #14532d; margin-bottom: 10px;">
+    <strong>✅ GPS safety fallback:</strong> If <code style="font-size: 11px;">geo_latitude</code> and <code style="font-size: 11px;">geo_longitude</code> are both 0, geofencing is bypassed even when <code style="font-size: 11px;">geo_enforce = True</code> — preventing accidental lockouts during initial setup.
+  </div>
+
+  <div style="background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 6px; padding: 14px 16px; font-size: 13px; color: #1e3a8a; margin-bottom: 32px;">
+    <strong>ℹ️ Material request routing chain:</strong> Employee → Work Location → Project → Store Manager / Project Manager. All three links must be configured for the approval chain to function correctly.
+  </div>
+
+</section>
