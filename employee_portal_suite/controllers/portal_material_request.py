@@ -185,6 +185,7 @@ class EmployeePortalMaterialRequests(http.Controller):
             if not f or f.filename.strip() == "":
                 continue
 
+            filename = f.filename.strip()
             file_content = f.read()
 
             request.env["ir.attachment"].sudo().create({
@@ -347,10 +348,10 @@ class EmployeePortalMaterialRequests(http.Controller):
             ("res_id", "=", rec.id)
         ])
         accounting_attachments = all_attachments.filtered(
-            lambda att: att.mr_attachment_category == "invoice_submission" or (att.description or "") == "Accounting Documents"
+            lambda att: (att.description or "") == "Accounting Documents"
         )
         quotation_attachments = all_attachments.filtered(
-            lambda att: att.mr_attachment_category == "quotation" or (att.description or "") == "Quotation Documents"
+            lambda att: (att.description or "") == "Quotation Documents"
         )
         attachments = all_attachments - accounting_attachments - quotation_attachments
         is_purchase_rep = request.env.user.has_group("employee_portal_suite.group_mr_purchase_rep")
@@ -545,6 +546,8 @@ class EmployeePortalMaterialRequests(http.Controller):
         if not rec.exists():
             return request.not_found()
 
+        files = request.httprequest.files.getlist("attachments")
+
         category_by_tag = {
             "Accounting Documents": "invoice_submission",
             "Quotation Documents": "quotation",
@@ -555,9 +558,7 @@ class EmployeePortalMaterialRequests(http.Controller):
             if not request.env.user.has_group("employee_portal_suite.group_mr_purchase_rep"):
                 return request.redirect("/my")
         if category == "invoice_submission" and rec.state != "approved":
-            return request.redirect(f"/my/employee/material/approvals/{rec.id}")
-
-        files = request.httprequest.files.getlist("attachments")
+            return request.redirect(f"/my/employee/material/approvals/{req_id}")
 
         allowed_accounting_ext = (".pdf", ".jpg", ".jpeg", ".png", ".xls", ".xlsx")
         allowed_quotation_ext = (".pdf", ".jpg", ".jpeg", ".png", ".xls", ".xlsx", ".doc", ".docx")
@@ -565,6 +566,7 @@ class EmployeePortalMaterialRequests(http.Controller):
         max_quotation_size = 10 * 1024 * 1024
 
         uploaded_names = []
+
         for f in files:
             if not f or f.filename.strip() == "":
                 continue
@@ -576,6 +578,7 @@ class EmployeePortalMaterialRequests(http.Controller):
                 continue
 
             file_content = f.read()
+
             if category == "invoice_submission" and len(file_content) > max_accounting_size:
                 continue
             if category == "quotation" and len(file_content) > max_quotation_size:
@@ -589,9 +592,9 @@ class EmployeePortalMaterialRequests(http.Controller):
                 "res_id": rec.id,
                 "type": "binary",
                 "description": tag,
-                "mr_attachment_category": category,
                 "public": True,   # ← THIS IS THE MAGIC FIX
             })
+
             uploaded_names.append(filename)
 
         if uploaded_names:
@@ -630,7 +633,7 @@ class EmployeePortalMaterialRequests(http.Controller):
         att = request.env["ir.attachment"].sudo().browse(att_id)
         rec = request.env["material.request"].sudo().browse(req_id)
         if att.exists() and rec.exists():
-            category = att.mr_attachment_category or ("invoice_submission" if (att.description or "") == "Accounting Documents" else "quotation" if (att.description or "") == "Quotation Documents" else "general")
+            category = "invoice_submission" if (att.description or "") == "Accounting Documents" else "quotation" if (att.description or "") == "Quotation Documents" else "general"
 
             # Quotation and invoice submission files are managed by the Purchase Representative
             # from the portal. Deletion should behave like the original MR attachment delete,

@@ -170,8 +170,6 @@ class MaterialRequest(models.Model):
         return [
             ("res_model", "=", "material.request"),
             ("res_id", "=", self.id),
-            "|",
-            ("mr_attachment_category", "=", category),
             ("description", "=", legacy_description),
         ]
 
@@ -302,7 +300,7 @@ class MaterialRequest(models.Model):
                 "context": {
                     "default_move_type": "in_invoice",
                     "default_material_request_id": self.id,
-                        "default_invoice_line_ids": self._prepare_vendor_bill_line_vals(),
+                    "default_invoice_line_ids": self._prepare_vendor_bill_line_vals(),
                 },
             }
 
@@ -323,6 +321,7 @@ class MaterialRequest(models.Model):
     # CLARIFICATION
     # ---------------------------------------------------------
     needs_clarification = fields.Boolean(default=False)
+
 
     clarification_stage = fields.Selection(
         selection=lambda self: self._fields['state'].selection,
@@ -859,6 +858,18 @@ class MaterialRequest(models.Model):
 
         return timeline
         
+    def get_readable_status(self):
+        mapping = {
+            "purchase": "Pending Purchase",
+            "store": "Pending Store Manager",
+            "project_manager": "Pending PM",
+            "director": "Pending Director",
+            "ceo": "Pending CEO",
+            "approved": "Fully Approved",
+            "rejected": "Rejected",
+        }
+        return mapping.get(self.state, "Unknown")
+
     @api.model
     def retrieve_dashboard(self):
         domain = []
@@ -879,20 +890,7 @@ class MaterialRequest(models.Model):
         }
         return data
 
-    def get_readable_status(self):
-        mapping = {
-            "purchase": "Pending Purchase",
-            "store": "Pending Store Manager",
-            "project_manager": "Pending PM",
-            "director": "Pending Director",
-            "ceo": "Pending CEO",
-            "approved": "Fully Approved",
-            "rejected": "Rejected",
-        }
-        return mapping.get(self.state, "Unknown")
-
-
-    #Purchase Extension 
+    #Purchase Extension
     def action_create_po(self):
         self.ensure_one()
 

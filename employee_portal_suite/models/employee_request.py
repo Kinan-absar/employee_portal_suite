@@ -382,24 +382,6 @@ class EmployeeRequest(models.Model):
 
         return timeline
 
-    @api.model
-    def retrieve_dashboard(self):
-        data = {
-            'all_count': self.search_count([]),
-            'draft_count': self.search_count([('state', '=', 'draft')]),
-            'manager_count': self.search_count([('state', '=', 'manager')]),
-            'hr_count': self.search_count([('state', '=', 'hr')]),
-            'finance_count': self.search_count([('state', '=', 'finance')]),
-            'ceo_count': self.search_count([('state', '=', 'ceo')]),
-            'approved_count': self.search_count([('state', '=', 'approved')]),
-            'rejected_count': self.search_count([('state', '=', 'rejected')]),
-            'leave_count': self.search_count([('request_type', '=', 'leave')]),
-            'advance_count': self.search_count([('request_type', '=', 'advance')]),
-            'other_count': self.search_count([('request_type', '=', 'other')]),
-            'my_count': self.search_count([('create_uid', '=', self.env.user.id)]),
-        }
-        return data
-
     def get_readable_status(self):
         mapping = {
             "manager": "Pending Manager",
@@ -477,3 +459,21 @@ class EmployeeRequest(models.Model):
             })
             mail.send()
 
+
+    @api.model
+    def retrieve_dashboard(self):
+        data = {
+            'all_count': self.search_count([]),
+            'draft_count': self.search_count([('state', '=', 'draft')]),
+            'manager_count': self.search_count([('state', '=', 'manager')]),
+            'hr_count': self.search_count([('state', '=', 'hr')]),
+            'finance_count': self.search_count([('state', '=', 'finance')]),
+            'ceo_count': self.search_count([('state', '=', 'ceo')]),
+            'approved_count': self.search_count([('state', '=', 'approved')]),
+            'rejected_count': self.search_count([('state', '=', 'rejected')]),
+            'leave_count': self.search_count([('request_type', '=', 'leave')]),
+            'advance_count': self.search_count([('request_type', '=', 'advance')]),
+            'other_count': self.search_count([('request_type', '=', 'other')]),
+            'my_count': self.search_count([('create_uid', '=', self.env.user.id)]),
+        }
+        return data

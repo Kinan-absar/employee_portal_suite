@@ -27,11 +27,8 @@
 
     This module enables a complete self-service environment for employees and a unified approval center for managers.
     """,
-    "author": "Kinan",
-    "website": "https://absar-alomran.com",
-    "license": "OPL-1",
-    "price": 249.99,
-    "currency": "USD",
+    'license': 'LGPL-3',
+    'author': 'Kinan',
     'category': 'Human Resources',
     'application': True,
     'installable': True,
@@ -78,7 +75,6 @@
         # --- BACKEND VIEWS ---
         'views/employee_request_views.xml',
         'views/material_request_views.xml',
-        'views/account_move_views.xml',
         'views/portal_announcement_views.xml',
         'views/menus.xml',
         
@@ -114,6 +110,7 @@
         'views/project_project_views.xml',
         'views/employee_portal_attendance.xml',
         'views/hr_attendance_views.xml',
+        'views/account_move_views.xml',
 
     ],
 

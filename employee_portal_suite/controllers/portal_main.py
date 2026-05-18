@@ -165,10 +165,10 @@ class EmployeePortalMain(CustomerPortal):
         # ------------------------------------------------------
         # 8. Attendance Status
         # ------------------------------------------------------
+        attendance_checked_in = False
         can_use_attendance = request.env.user.has_group(
             'employee_portal_suite.group_portal_attendance_user'
         )
-        attendance_checked_in = False
         if employee and can_use_attendance:
             open_att = request.env['hr.attendance'].sudo().search([
                 ('employee_id', '=', employee.id),
