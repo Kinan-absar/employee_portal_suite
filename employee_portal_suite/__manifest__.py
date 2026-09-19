@@ -130,6 +130,6 @@
             'employee_portal_suite/static/src/scss/employee_request_dashboard.scss',
         ],
     },
-    'images': ['static/description/icon.png'],
+    'images': ['images/main_screenshot.png'],
 
 }
