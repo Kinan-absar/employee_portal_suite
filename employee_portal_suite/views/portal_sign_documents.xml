@@ -88,12 +88,12 @@
 
                                 <!-- FILE -->
                                 <td>
-                                    <t t-esc="filename"/>
+                                    <t t-out="filename"/>
                                 </td>
 
                                 <!-- DATE -->
                                 <td>
-                                    <t t-esc="date"/>
+                                    <t t-out="date"/>
                                 </td>
 
                                 <!-- YOUR STATUS BADGE -->
@@ -111,7 +111,7 @@
 
                                 <!-- WORKFLOW -->
                                 <td>
-                                    <t t-esc="workflow_status"/>
+                                    <t t-out="workflow_status"/>
                                 </td>
 
                                 <!-- ACTIONS -->
@@ -125,20 +125,12 @@
                                     <!-- PENDING -->
                                     <t t-elif="'🟡' in your_status">
                                         <a class="btn btn-sm btn-primary"
-                                           t-attf-href="/sign/document/{{ item.sign_request_id.id }}/{{ doc['access_token'] }}?portal=1"
-                                        target="_blank">
+                                           t-attf-href="/sign/document/{{ item.sign_request_id.id }}/{{ doc['access_token'] }}?portal=1">
                                             Sign
                                         </a>
                                     </t>
 
-                                    <!-- SIGNED -->
-                                    <t t-else="">
-                                        <a class="btn btn-sm btn-primary"
-                                        t-attf-href="/my/signature/{{ item.id }}?access_token={{ doc['access_token'] }}"
-                                        target="_blank">
-                                            View
-                                        </a>
-                                    </t>
+
                                     <!-- DOWNLOAD FINAL PDF (FIXED TOKEN!) -->
                                     <t t-if="item.sign_request_id.state == 'signed'">
                                         <a class="btn btn-sm btn-outline-secondary ms-1"
@@ -175,7 +167,7 @@
 
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="fw-semibold">
-                            <t t-esc="filename"/>
+                            <t t-out="filename"/>
                         </div>
 
                         <div>
@@ -192,11 +184,11 @@
                     </div>
 
                     <div class="text-muted small mb-2">
-                        <t t-esc="date"/>
+                        <t t-out="date"/>
                     </div>
 
                     <div class="text-muted small mb-3">
-                        <t t-esc="workflow_status"/>
+                        <t t-out="workflow_status"/>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">
@@ -207,19 +199,12 @@
 
                         <t t-elif="'🟡' in your_status">
                             <a class="btn btn-sm btn-primary"
-                               t-attf-href="/sign/document/{{ item.sign_request_id.id }}/{{ doc['access_token'] }}?portal=1"
-                               target="_blank">
+                               t-attf-href="/sign/document/{{ item.sign_request_id.id }}/{{ doc['access_token'] }}?portal=1">
                                 Sign
                             </a>
                         </t>
 
-                        <t t-else="">
-                            <a class="btn btn-sm btn-outline-primary"
-                               t-attf-href="/my/signature/{{ item.id }}?access_token={{ doc['access_token'] }}"
-                               target="_blank">
-                                View
-                            </a>
-                        </t>
+
 
                         <t t-if="item.sign_request_id.state == 'signed'">
                             <a class="btn btn-sm btn-outline-secondary"

@@ -10,6 +10,15 @@ _logger = logging.getLogger(__name__)
 class HrAttendance(models.Model):
     _inherit = "hr.attendance"
 
+    in_mode = fields.Selection(
+        selection_add=[('portal', 'Employee Portal')],
+        ondelete={'portal': 'set default'},
+    )
+    out_mode = fields.Selection(
+        selection_add=[('portal', 'Employee Portal')],
+        ondelete={'portal': 'set default'},
+    )
+
     # ------------------------------------------------------------------
     # FIELD: flagged when employee checked out outside their work location
     # ------------------------------------------------------------------
@@ -21,6 +30,59 @@ class HrAttendance(models.Model):
             "that is outside the allowed radius of their assigned work location."
         ),
         readonly=True,
+    )
+
+    # Exact project geofence detected by the portal attendance flow.
+    # The project line is stored as well because it is the record containing
+    # the employee restriction, coordinates, radius, and related project.
+    check_in_project_id = fields.Many2one(
+        "project.project", string="Check-in Project", readonly=True, index=True,
+        ondelete="set null",
+    )
+    check_in_project_location_id = fields.Many2one(
+        "hr.work.location.project", string="Check-in Project Site",
+        readonly=True, index=True, ondelete="set null",
+    )
+    check_in_work_location_id = fields.Many2one(
+        "hr.work.location", string="Check-in Work Location",
+        readonly=True, index=True, ondelete="set null",
+    )
+    check_in_project_distance = fields.Float(
+        string="Check-in Distance (m)", readonly=True,
+    )
+    check_in_geo_latitude = fields.Float(
+        string="Check-in Latitude", digits=(10, 7), readonly=True,
+    )
+    check_in_geo_longitude = fields.Float(
+        string="Check-in Longitude", digits=(10, 7), readonly=True,
+    )
+    check_out_project_id = fields.Many2one(
+        "project.project", string="Check-out Project", readonly=True, index=True,
+        ondelete="set null",
+    )
+    check_out_project_location_id = fields.Many2one(
+        "hr.work.location.project", string="Check-out Project Site",
+        readonly=True, index=True, ondelete="set null",
+    )
+    check_out_work_location_id = fields.Many2one(
+        "hr.work.location", string="Check-out Work Location",
+        readonly=True, index=True, ondelete="set null",
+    )
+    check_out_project_distance = fields.Float(
+        string="Check-out Distance (m)", readonly=True,
+    )
+    check_out_geo_latitude = fields.Float(
+        string="Check-out Latitude", digits=(10, 7), readonly=True,
+    )
+    check_out_geo_longitude = fields.Float(
+        string="Check-out Longitude", digits=(10, 7), readonly=True,
+    )
+
+    # Payroll allocation uses the project detected at check-in. Keeping a
+    # dedicated related-style field name makes grouping and reporting clear.
+    payroll_project_id = fields.Many2one(
+        "project.project", string="Payroll Project",
+        related="check_in_project_id", store=True, readonly=True, index=True,
     )
 
     # ------------------------------------------------------------------
@@ -35,7 +97,10 @@ class HrAttendance(models.Model):
             "because they forgot to check out manually."
         ),
     )
-
+    attendance_exception_state = fields.Selection([
+        ('pending', 'Pending Review'),
+        ('resolved', 'Resolved'),
+    ], string="Exception Status", default='pending', tracking=True)
     # ------------------------------------------------------------------
     # WRITE OVERRIDE — detect portal vs. system checkouts
     #
@@ -178,6 +243,14 @@ class HrAttendance(models.Model):
                 author_id=self.env.ref('base.user_root').partner_id.id,
             )
 
+            if employee and employee.user_id:
+                self.env['employee.portal.telegram.service'].sudo().send_to_user(
+                    employee.user_id,
+                    'Automatic clock-out',
+                    f'You were automatically checked out by the system at {time_str} because no manual clock-out was recorded.',
+                    '/my/employee/attendance',
+                )
+
     # ------------------------------------------------------------------
     # NOTIFICATION: outside-location checkout (unchanged)
     # ------------------------------------------------------------------
@@ -211,4 +284,12 @@ class HrAttendance(models.Model):
                 message_type='comment',
                 subtype_xmlid='mail.mt_note',
                 author_id=self.env.ref('base.user_root').partner_id.id,
+            )
+    def action_resolve_attendance_exception(self):
+        for record in self:
+            record.attendance_exception_state = 'resolved'
+            record.message_post(
+                body="Attendance exception has been marked as resolved.",
+                message_type='comment',
+                subtype_xmlid='mail.mt_note',
             )

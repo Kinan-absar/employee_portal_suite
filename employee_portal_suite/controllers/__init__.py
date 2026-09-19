@@ -4,3 +4,20 @@ from . import portal_redirect
 from . import portal_material_request
 from . import portal_sign_documents
 from . import portal_attendance
+
+from . import portal_salary_report
+
+from . import portal_reports
+
+from . import portal_announcements
+from . import portal_purchase_order
+
+from . import telegram
+
+from . import portal_call
+
+from . import portal_chat
+
+from . import portal_native_discuss
+
+from . import web_push

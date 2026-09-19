@@ -1,3 +1,4 @@
+import base64
 from odoo import http
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
@@ -15,6 +16,16 @@ class EmployeePortalMain(CustomerPortal):
         if not request.env.ref(xmlid, raise_if_not_found=False):
             return False
         return request.env.user.has_group(xmlid)
+
+    def _has_read_access(self, model_name):
+        """Return whether the current user can read an optional model."""
+        if not self._model_exists(model_name):
+            return False
+        try:
+            request.env[model_name].check_access('read')
+            return True
+        except AccessError:
+            return False
 
     def _construction_portal_available(self):
         """Construction Contract Management is optional for Employee Portal Suite."""
@@ -47,12 +58,18 @@ class EmployeePortalMain(CustomerPortal):
     # ---------------------------------------------------------
     @http.route('/my/employee', type='http', auth='user', website=True)
     def employee_portal_dashboard(self, **kw):
-        # Attendance-only users go straight to the attendance page.
-        if request.env.user.has_group('employee_portal_suite.group_attendance_only'):
-            return request.redirect('/my/employee/attendance')
-
         user = request.env.user
+        # The Employee Portal is for share/portal employee accounts only.
+        # Internal Odoo users must stay in the backend even when linked to hr.employee.
+        if not user.share:
+            return request.redirect('/web')
         employee = user.employee_id
+        if not employee:
+            return request.redirect('/my')
+
+        # Attendance-only portal users go straight to the attendance page.
+        if user.has_group('employee_portal_suite.group_attendance_only'):
+            return request.redirect('/my/employee/attendance')
 
         # ------------------------------------------------------
         # 1. My Employee Requests
@@ -69,57 +86,23 @@ class EmployeePortalMain(CustomerPortal):
         ])
 
         # ------------------------------------------------------
-        # 3. Employee Pending Approvals
+        # 3-5, 7-8. Pending approvals, signatures, and reports —
+        # all sourced from the shared notification summary so the
+        # dashboard cards and the header bell never disagree.
         # ------------------------------------------------------
-        employee_pending_count = 0
+        notif_summary = request.env['portal.report.seen'].sudo()._get_notification_summary(user)
 
-        pending_recs = request.env['employee.request'].sudo().search([
-            ('state', 'in', ['manager', 'hr', 'finance', 'ceo'])
-        ])
+        employee_pending_count = notif_summary.get('er_approval', {}).get('count', 0)
+        new_employee_pending_count = notif_summary.get('er_approval', {}).get('new', 0)
+        material_pending_count = notif_summary.get('mr_approval', {}).get('count', 0)
+        new_material_pending_count = notif_summary.get('mr_approval', {}).get('new', 0)
+        pending_sign_count = notif_summary.get('sign_request', {}).get('count', 0)
+        new_pending_sign_count = notif_summary.get('sign_request', {}).get('new', 0)
+        salary_report_count = notif_summary.get('salary_report', {}).get('count', 0)
+        new_salary_report_count = notif_summary.get('salary_report', {}).get('new', 0)
+        portal_report_count = notif_summary.get('portal_report', {}).get('count', 0)
+        new_portal_report_count = notif_summary.get('portal_report', {}).get('new', 0)
 
-        for rec in pending_recs:
-            if rec.state == 'manager' and user.has_group('employee_portal_suite.group_employee_portal_manager'):
-                if rec.manager_id == employee:
-                    employee_pending_count += 1
-            elif rec.state == 'hr' and user.has_group('employee_portal_suite.group_employee_portal_hr'):
-                employee_pending_count += 1
-            elif rec.state == 'finance' and user.has_group('employee_portal_suite.group_employee_portal_finance'):
-                employee_pending_count += 1
-            elif rec.state == 'ceo' and user.has_group('employee_portal_suite.group_employee_portal_ceo'):
-                employee_pending_count += 1
-
-        # ------------------------------------------------------
-        # 4. Material Pending Approvals
-        # ------------------------------------------------------
-        material_pending_count = 0
-        Material = request.env['material.request'].sudo()
-
-        pending_recs = Material.search([
-            ('state', 'in', ['purchase', 'store', 'project_manager', 'director', 'ceo'])
-        ])
-
-        for rec in pending_recs:
-            if rec.state == 'purchase' and user.has_group('employee_portal_suite.group_mr_purchase_rep'):
-                material_pending_count += 1
-            elif rec.state == 'store' and rec.store_manager_user_id == user:
-                material_pending_count += 1
-            elif rec.state == 'project_manager' and rec.project_manager_user_id == user:
-                material_pending_count += 1
-            elif rec.state == 'director' and user.has_group('employee_portal_suite.group_mr_projects_director'):
-                material_pending_count += 1
-            elif rec.state == 'ceo' and user.has_group('employee_portal_suite.group_employee_portal_ceo'):
-                material_pending_count += 1
-        
-        # -------------------------------
-        # 5. Documents to Sign
-        # -------------------------------
-        pending_sign_count = 0
-        if "sign.request.item" in request.env:
-            pending_sign_count = request.env["sign.request.item"].sudo().search_count([
-                ('partner_id', '=', user.partner_id.id),
-                ('state', '=', 'sent')
-            ])
-        
         # -------------------------------
         # 6. Construction Counts
         # -------------------------------
@@ -128,15 +111,15 @@ class EmployeePortalMain(CustomerPortal):
         variation_count = 0
         measurement_count = 0
         
-        if self._construction_portal_available() and request.env['construction.contract'].check_access_rights('read', raise_exception=False):
+        if self._construction_portal_available() and self._has_read_access('construction.contract'):
             contract_count = request.env['construction.contract'].search_count([])
             ipc_count = request.env['construction.ipc'].search_count([])
             variation_count = request.env['construction.variation'].search_count([])
             measurement_count = request.env['construction.measurement'].search_count([])
         show_construction_cards = self._construction_portal_available() and self._safe_has_group('construction_contract_management.group_construction_portal')
-        
+
         # ------------------------------------------------------
-        # 7. Recent Activities
+        # 9. Recent Activities
         # ------------------------------------------------------
         from itertools import chain
 
@@ -163,7 +146,7 @@ class EmployeePortalMain(CustomerPortal):
         )[:6]
 
         # ------------------------------------------------------
-        # 8. Attendance Status
+        # 9. Attendance Status
         # ------------------------------------------------------
         can_use_attendance = request.env.user.has_group(
             'employee_portal_suite.group_portal_attendance_user'
@@ -183,8 +166,15 @@ class EmployeePortalMain(CustomerPortal):
             "my_request_count": my_request_count,
             "my_material_count": my_material_count,
             "employee_pending_count": employee_pending_count,
+            "new_employee_pending_count": new_employee_pending_count,
             "material_pending_count": material_pending_count,
+            "new_material_pending_count": new_material_pending_count,
             "pending_sign_count": pending_sign_count,
+            "new_pending_sign_count": new_pending_sign_count,
+            "salary_report_count": salary_report_count,
+            "new_salary_report_count": new_salary_report_count,
+            "portal_report_count": portal_report_count,
+            "new_portal_report_count": new_portal_report_count,
             "recent_activities": recent_activities,
             "contract_count": contract_count,
             "ipc_count": ipc_count,
@@ -195,818 +185,126 @@ class EmployeePortalMain(CustomerPortal):
             "can_use_attendance": can_use_attendance,
         })
 
-    # ---------------------------------------------------------
-    # PETTY CASH
-    # ---------------------------------------------------------
-    @http.route("/my/employee/petty-cash", type="http", auth="user", website=True)
-    def portal_petty_cash_list(self, **kw):
+    @http.route('/my/employee/profile', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=True)
+    def employee_profile(self, **post):
         user = request.env.user
+        if not user.share:
+            return request.redirect('/web')
+        employee = user.employee_id.sudo()
+        if not employee:
+            return request.redirect('/my')
 
-        if not self._safe_has_group("petty_cash_management.group_portal_petty_cash_user"):
-            return request.redirect("/my")
+        saved = False
+        bank_changed = False
+        if request.httprequest.method == 'POST':
+            vals = {}
 
-        records = request.env["petty.cash"].search([
-            ("user_id", "=", user.id)
-        ])
+            # The login/work email is intentionally admin-controlled and never
+            # writable from employee self-service.
+            for field_name in ('work_phone', 'mobile_phone'):
+                if field_name in employee._fields and field_name in post:
+                    vals[field_name] = (post.get(field_name) or '').strip()
 
-        return request.render("employee_portal_suite.portal_petty_cash_list", {
-            "records": records,
-        })
-
-    @http.route("/my/employee/petty-cash/new", type="http", auth="user", website=True)
-    def portal_petty_cash_new(self, **kw):
-        if not request.env.self._safe_has_group("petty_cash_management.group_portal_petty_cash_user"):
-            return request.redirect("/my")
-
-        return request.render("employee_portal_suite.portal_petty_cash_new")
-
-    # ---------------------------------------------------------
-    # CONSTRUCTION - CONTRACTS
-    # ---------------------------------------------------------
-    @http.route(['/my/employee/contracts', '/my/employee/contracts/page/<int:page>'], 
-                type='http', auth='user', website=True)
-    def portal_construction_contracts(self, page=1, sortby=None, filterby=None, **kw):
-        user = request.env.user
-
-        if not self._model_exists('construction.contract') or not request.env['construction.contract'].check_access_rights('read', raise_exception=False):
-            return request.redirect("/my/employee")
-
-        values = self._prepare_portal_layout_values()
-        ConstructionContract = request.env['construction.contract'].sudo()
-
-        allowed_contract_ids = self._portal_visible_contract_ids()
-        domain = [('id', 'in', allowed_contract_ids)] if allowed_contract_ids else [('id', '=', 0)]
-        searchbar_sortings = {
-            'date': {'label': 'Newest', 'order': 'id desc'},
-            'name': {'label': 'Name', 'order': 'name'},
-            'partner': {'label': 'Partner', 'order': 'partner_id'},
-        }
-        status_options = {
-            'all': {'label': 'All', 'domain': []},
-            'draft': {'label': 'Draft', 'domain': [('state', '=', 'draft')]},
-            'under_review': {'label': 'Under Review', 'domain': [('state', '=', 'under_review')]},
-            'approved': {'label': 'Approved', 'domain': [('state', '=', 'approved')]},
-            'active': {'label': 'Active', 'domain': [('state', '=', 'active')]},
-            'completed': {'label': 'Completed', 'domain': [('state', '=', 'completed')]},
-        }
-        direction_options = {
-            'all': {'label': 'All Directions', 'domain': []},
-            'inbound': {'label': 'Client Contract', 'domain': [('contract_direction', '=', 'inbound')]},
-            'outbound': {'label': 'Subcontract', 'domain': [('contract_direction', '=', 'outbound')]},
-        }
-
-        if not sortby:
-            sortby = 'date'
-        order = searchbar_sortings[sortby]['order']
-
-        status_filter = kw.get('status_filter') or filterby or 'all'
-        if status_filter not in status_options:
-            status_filter = 'all'
-        domain += status_options[status_filter]['domain']
-
-        direction_filter = (kw.get('direction_filter') or 'all').strip()
-        if direction_filter not in direction_options:
-            direction_filter = 'all'
-        domain += direction_options[direction_filter]['domain']
-
-        contract_count = ConstructionContract.search_count(domain)
-
-        pager = portal_pager(
-            url="/my/employee/contracts",
-            url_args={'sortby': sortby, 'status_filter': status_filter, 'direction_filter': direction_filter},
-            total=contract_count,
-            page=page,
-            step=self._items_per_page
-        )
-
-        contracts = ConstructionContract.search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
-
-        values.update({
-            'contracts': contracts,
-            'page_name': 'construction_contract',
-            'default_url': '/my/employee/contracts',
-            'pager': pager,
-            'searchbar_sortings': searchbar_sortings,
-            'status_options': status_options,
-            'direction_options': direction_options,
-            'sortby': sortby,
-            'status_filter': status_filter,
-            'direction_filter': direction_filter,
-        })
-        return request.render("construction_contract_management.portal_employee_contracts", values)
-
-    @http.route(['/my/employee/contract/<int:contract_id>'], type='http', auth='user', website=True)
-    def portal_construction_contract_detail(self, contract_id, access_token=None, report_type=None, download=False, **kw):
-        if not self._model_exists('construction.contract'):
-            return request.redirect('/my/employee')
-        contract = self._portal_visible_contracts().filtered(lambda c: c.id == contract_id)[:1]
-        if not contract:
-            return request.redirect('/my/employee')
-
-        if report_type in ('html', 'pdf', 'text'):
-            return self._show_report(
-                model=contract.sudo(),
-                report_type=report_type,
-                report_ref='construction_contract_management.action_report_construction_contract',
-                download=download,
+            # Exact Odoo 18 hr.employee private-information technical fields.
+            char_fields = (
+                'private_street', 'private_street2', 'private_city', 'private_zip',
+                'private_email', 'private_phone', 'private_car_plate',
+                'emergency_contact', 'emergency_phone', 'spouse_complete_name',
+                'identification_id', 'ssnid', 'passport_id', 'place_of_birth',
+                'study_field', 'study_school', 'visa_no', 'permit_no',
             )
-
-        values = {
-            'contract': contract,
-            'page_name': 'construction_contract',
-        }
-        return request.render("construction_contract_management.portal_employee_contract_detail", values)
-
-    # ---------------------------------------------------------
-    # CONSTRUCTION - IPCs
-    # ---------------------------------------------------------
-    @http.route(['/my/employee/ipcs', '/my/employee/ipcs/page/<int:page>'], 
-                type='http', auth='user', website=True)
-    def portal_construction_ipcs(self, page=1, sortby=None, filterby=None, **kw):
-        user = request.env.user
-
-        if not self._model_exists('construction.ipc') or not request.env['construction.ipc'].check_access_rights('read', raise_exception=False):
-            return request.redirect("/my/employee")
-
-        values = self._prepare_portal_layout_values()
-        ConstructionIPC = request.env['construction.ipc'].sudo()
-
-        allowed_contract_ids = self._portal_visible_contract_ids()
-        domain = [('contract_id', 'in', allowed_contract_ids)] if allowed_contract_ids else [('id', '=', 0)]
-        searchbar_sortings = {
-            'date': {'label': 'Newest', 'order': 'id desc'},
-            'name': {'label': 'Reference', 'order': 'name'},
-            'contract': {'label': 'Contract', 'order': 'contract_id'},
-        }
-        status_options = {
-            'all': {'label': 'All', 'domain': []},
-            'draft': {'label': 'Draft', 'domain': [('state', '=', 'draft')]},
-            'under_review': {'label': 'Under Review', 'domain': [('state', '=', 'under_review')]},
-            'approved': {'label': 'Approved', 'domain': [('state', '=', 'approved')]},
-            'done': {'label': 'Done', 'domain': [('state', '=', 'done')]},
-            'cancelled': {'label': 'Cancelled', 'domain': [('state', '=', 'cancelled')]},
-        }
-
-        if not sortby:
-            sortby = 'date'
-        order = searchbar_sortings[sortby]['order']
-
-        status_filter = kw.get('status_filter') or filterby or 'all'
-        if status_filter not in status_options:
-            status_filter = 'all'
-        domain += status_options[status_filter]['domain']
-
-        project_option_records = self._portal_visible_contracts().mapped('project_id').filtered(lambda p: p.id)
-        project_options = [{'value': 'all', 'label': 'All Projects'}]
-        for project in project_option_records.sorted(lambda p: (p.name or '').lower()):
-            project_options.append({'value': str(project.id), 'label': project.name})
-
-        project_filter = (kw.get('project_filter') or 'all').strip()
-        if project_filter != 'all' and project_filter.isdigit():
-            domain.append(('contract_id.project_id', '=', int(project_filter)))
-        else:
-            project_filter = 'all'
-
-        direction_options = {
-            'all': {'label': 'All Directions', 'domain': []},
-            'inbound': {'label': 'Client Contract', 'domain': [('contract_id.contract_direction', '=', 'inbound')]},
-            'outbound': {'label': 'Subcontract', 'domain': [('contract_id.contract_direction', '=', 'outbound')]},
-        }
-        direction_filter = (kw.get('direction_filter') or 'all').strip()
-        if direction_filter not in direction_options:
-            direction_filter = 'all'
-        domain += direction_options[direction_filter]['domain']
-
-        ipc_count = ConstructionIPC.search_count(domain)
-
-        pager = portal_pager(
-            url="/my/employee/ipcs",
-            url_args={'sortby': sortby, 'status_filter': status_filter, 'project_filter': project_filter, 'direction_filter': direction_filter},
-            total=ipc_count,
-            page=page,
-            step=self._items_per_page
-        )
-
-        ipcs = ConstructionIPC.search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
-
-        values.update({
-            'ipcs': ipcs,
-            'page_name': 'construction_ipc',
-            'default_url': '/my/employee/ipcs',
-            'pager': pager,
-            'searchbar_sortings': searchbar_sortings,
-            'status_options': status_options,
-            'project_options': project_options,
-            'direction_options': direction_options,
-            'sortby': sortby,
-            'status_filter': status_filter,
-            'project_filter': project_filter,
-            'direction_filter': direction_filter,
-        })
-        return request.render("construction_contract_management.portal_employee_ipcs", values)
-
-    @http.route(['/my/employee/ipc/<int:ipc_id>'], type='http', auth='user', website=True)
-    def portal_construction_ipc_detail(self, ipc_id, access_token=None, report_type=None, download=False, **kw):
-        if not self._model_exists('construction.ipc'):
-            return request.redirect('/my/employee')
-        try:
-            ipc_sudo = self._document_check_access('construction.ipc', ipc_id, access_token)
-        except (AccessError, MissingError):
-            return request.redirect('/my/employee')
-
-        if report_type in ('html', 'pdf', 'text'):
-            return self._show_report(model=ipc_sudo, report_type=report_type, 
-                                    report_ref='construction_contract_management.action_report_construction_ipc', 
-                                    download=download)
-
-        values = {
-            'ipc': ipc_sudo,
-            'page_name': 'construction_ipc',
-        }
-        return request.render("construction_contract_management.portal_employee_ipc_detail", values)
-
-    # ---------------------------------------------------------
-    # CONSTRUCTION - VARIATIONS
-    # ---------------------------------------------------------
-    @http.route(['/my/employee/variations', '/my/employee/variations/page/<int:page>'], 
-                type='http', auth='user', website=True)
-    def portal_construction_variations(self, page=1, sortby=None, filterby=None, **kw):
-        user = request.env.user
-
-        if not self._model_exists('construction.variation') or not request.env['construction.variation'].check_access_rights('read', raise_exception=False):
-            return request.redirect("/my/employee")
-
-        values = self._prepare_portal_layout_values()
-        ConstructionVariation = request.env['construction.variation'].sudo()
-
-        allowed_contract_ids = self._portal_visible_contract_ids()
-        domain = [('contract_id', 'in', allowed_contract_ids)] if allowed_contract_ids else [('id', '=', 0)]
-        searchbar_sortings = {
-            'date': {'label': 'Newest', 'order': 'id desc'},
-            'name': {'label': 'Reference', 'order': 'name'},
-        }
-        status_options = {
-            'all': {'label': 'All', 'domain': []},
-            'draft': {'label': 'Draft', 'domain': [('state', '=', 'draft')]},
-            'submitted': {'label': 'Submitted', 'domain': [('state', '=', 'submitted')]},
-            'approved': {'label': 'Approved', 'domain': [('state', '=', 'approved')]},
-            'rejected': {'label': 'Rejected', 'domain': [('state', '=', 'rejected')]},
-        }
-
-        if not sortby:
-            sortby = 'date'
-        order = searchbar_sortings[sortby]['order']
-
-        status_filter = kw.get('status_filter') or filterby or 'all'
-        if status_filter not in status_options:
-            status_filter = 'all'
-        domain += status_options[status_filter]['domain']
-
-        project_option_records = self._portal_visible_contracts().mapped('project_id').filtered(lambda p: p.id)
-        project_options = [{'value': 'all', 'label': 'All Projects'}]
-        for project in project_option_records.sorted(lambda p: (p.name or '').lower()):
-            project_options.append({'value': str(project.id), 'label': project.name})
-
-        project_filter = (kw.get('project_filter') or 'all').strip()
-        if project_filter != 'all' and project_filter.isdigit():
-            domain.append(('contract_id.project_id', '=', int(project_filter)))
-        else:
-            project_filter = 'all'
-
-        direction_options = {
-            'all': {'label': 'All Directions', 'domain': []},
-            'inbound': {'label': 'Client Contract', 'domain': [('contract_id.contract_direction', '=', 'inbound')]},
-            'outbound': {'label': 'Subcontract', 'domain': [('contract_id.contract_direction', '=', 'outbound')]},
-        }
-        direction_filter = (kw.get('direction_filter') or 'all').strip()
-        if direction_filter not in direction_options:
-            direction_filter = 'all'
-        domain += direction_options[direction_filter]['domain']
-
-        variation_count = ConstructionVariation.search_count(domain)
-        
-        pager = portal_pager(
-            url="/my/employee/variations",
-            url_args={'sortby': sortby, 'status_filter': status_filter, 'project_filter': project_filter, 'direction_filter': direction_filter},
-            total=variation_count,
-            page=page,
-            step=self._items_per_page
-        )
-
-        variations = ConstructionVariation.search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
-
-        values.update({
-            'variations': variations,
-            'page_name': 'construction_variation',
-            'pager': pager,
-            'searchbar_sortings': searchbar_sortings,
-            'status_options': status_options,
-            'project_options': project_options,
-            'direction_options': direction_options,
-            'sortby': sortby,
-            'status_filter': status_filter,
-            'project_filter': project_filter,
-            'direction_filter': direction_filter,
-        })
-        return request.render("construction_contract_management.portal_employee_variations", values)
-
-    @http.route(['/my/employee/variation/<int:variation_id>'], type='http', auth='user', website=True)
-    def portal_employee_variation_detail(self, variation_id, access_token=None, report_type=None, download=False, **kw):
-        if not self._model_exists('construction.variation'):
-            return request.redirect('/my/employee')
-        try:
-            variation_sudo = self._document_check_access('construction.variation', variation_id, access_token)
-        except (AccessError, MissingError):
-            return request.redirect('/my/employee')
-
-        if report_type in ('html', 'pdf', 'text'):
-            return self._show_report(
-                model=variation_sudo,
-                report_type=report_type,
-                report_ref='construction_contract_management.action_report_construction_variation',
-                download=download,
+            date_fields = (
+                'spouse_birthdate', 'birthday', 'visa_expire',
+                'work_permit_expiration_date',
             )
-        boq_lines = variation_sudo.contract_id.boq_line_ids.sorted(lambda l: (l.sequence, l.id))
-
-        section_options = boq_lines.filtered(lambda l: l.display_type == 'line_section').mapped('description')
-        section_options = [s for s in section_options if s]
-        return request.render("construction_contract_management.portal_employee_variation_detail", {
-            'variation': variation_sudo,
-            'boq_lines': boq_lines,
-            'section_options': section_options,   # 👈 ADD THIS
-            'uoms': request.env['uom.uom'].sudo().search([]),
-            'line_types': [
-                ('increase', 'Quantity Increase'),
-                ('decrease', 'Quantity Decrease'),
-                ('new', 'New Item'),
-                ('omit', 'Omit Item'),
-                ('rate', 'Rate Change'),
-            ],
-            'success': request.params.get('success'),
-            'error': request.params.get('error'),
-            'page_name': 'construction_variation',
-        })
-
-    @http.route(['/my/employee/variation/<int:variation_id>/add_line'],
-                type='http', auth='user', website=True, methods=['POST'], csrf=True)
-    def portal_employee_variation_add_line(self, variation_id, **post):
-        if not self._model_exists('construction.variation'):
-            return request.redirect('/my/employee')
-        try:
-            allowed_contract_ids = self._portal_visible_contracts().ids
-            variation = request.env['construction.variation'].search([
-                ('id', '=', variation_id),
-                ('contract_id', 'in', allowed_contract_ids),
-            ], limit=1)
-            if not variation.exists():
-                return request.redirect('/my/employee/variations')
-
-            if variation.state != 'draft':
-                return request.redirect(f'/my/employee/variation/{variation_id}')
-
-            action = (post.get('action') or 'save').strip()
-            display_type = (post.get('display_type') or '').strip() or False
-            line_type = (post.get('type') or '').strip()
-            boq_line_id = int(post.get('boq_line_id')) if post.get('boq_line_id') else False
-            boq_line = request.env['construction.contract.boq.line'].sudo().browse(boq_line_id) if boq_line_id else False
-
-            # Submit existing lines only
-            if action == 'submit' and not display_type and not line_type and variation.line_ids:
-                variation.action_submit()
-                return request.redirect(f'/my/employee/variation/{variation_id}?success=submitted')
-
-            # Section / Note rows
-            if display_type in ('line_section', 'line_note'):
-                description = (post.get('line_description') or '').strip()
-                if not description:
-                    return request.redirect(f'/my/employee/variation/{variation_id}?error=validation')
-
-                vals = {
-                    'variation_id': variation.id,
-                    'display_type': display_type,
-                    'description': description,
-                }
-
-                request.env['construction.variation.line'].sudo().create(vals)
-
-                if action == 'submit':
-                    variation.action_submit()
-                    return request.redirect(f'/my/employee/variation/{variation_id}?success=submitted')
-
-                return request.redirect(f'/my/employee/variation/{variation_id}?success=saved')
-
-            # Normal line
-            vals = {
-                'variation_id': variation.id,
-                'display_type': False,
-                'type': line_type or False,
-                'boq_line_id': boq_line.id if boq_line else False,
-                'item_code': (post.get('item_code') or '').strip(),
-                'description': (post.get('line_description') or '').strip(),
-                'uom_id': int(post.get('uom_id')) if post.get('uom_id') else False,
-                'unit_rate': float(post.get('unit_rate') or 0.0),
-                'variation_qty': float(post.get('variation_qty') or 0.0),
-            }
-
-            if boq_line:
-                vals['item_code'] = vals['item_code'] or boq_line.item_code or False
-                vals['description'] = vals['description'] or boq_line.description or False
-                vals['uom_id'] = vals['uom_id'] or boq_line.uom_id.id or False
-                vals['unit_rate'] = float(post.get('unit_rate') or boq_line.unit_rate or 0.0)
-
-            if not vals['type']:
-                return request.redirect(f'/my/employee/variation/{variation_id}?error=validation')
-
-            if vals['type'] != 'new' and not boq_line:
-                return request.redirect(f'/my/employee/variation/{variation_id}?error=boq_required')
-
-            if not vals['description']:
-                return request.redirect(f'/my/employee/variation/{variation_id}?error=validation')
-
-            request.env['construction.variation.line'].sudo().create(vals)
-
-            if action == 'submit':
-                variation.action_submit()
-                return request.redirect(f'/my/employee/variation/{variation_id}?success=submitted')
-
-            return request.redirect(f'/my/employee/variation/{variation_id}?success=saved')
-
-        except (ValidationError, ValueError) as e:
-            _logger.exception("Variation validation failed for variation %s. post=%s error=%s", variation_id, post, e)
-            return request.redirect(f'/my/employee/variation/{variation_id}?error=validation')
-        except Exception as e:
-            _logger.exception("Variation system failure for variation %s. post=%s error=%s", variation_id, post, e)
-            return request.redirect(f'/my/employee/variation/{variation_id}?error=system')
-
-    # ---------------------------------------------------------
-    # CONSTRUCTION - MEASUREMENTS
-    # ---------------------------------------------------------
-    @http.route(['/my/employee/measurements', '/my/employee/measurements/page/<int:page>'], 
-                type='http', auth='user', website=True)
-    def portal_construction_measurements(self, page=1, sortby=None, filterby=None, **kw):
-        user = request.env.user
-
-        if not self._model_exists('construction.measurement') or not request.env['construction.measurement'].check_access_rights('read', raise_exception=False):
-            return request.redirect("/my/employee")
-
-        values = self._prepare_portal_layout_values()
-        ConstructionMeasurement = request.env['construction.measurement'].sudo()
-
-        allowed_contract_ids = self._portal_visible_contract_ids()
-        domain = [('contract_id', 'in', allowed_contract_ids)] if allowed_contract_ids else [('id', '=', 0)]
-        searchbar_sortings = {
-            'date': {'label': 'Newest', 'order': 'id desc'},
-            'name': {'label': 'Reference', 'order': 'name'},
-        }
-        status_options = {
-            'all': {'label': 'All', 'domain': []},
-            'draft': {'label': 'Draft', 'domain': [('state', '=', 'draft')]},
-            'submitted': {'label': 'Submitted', 'domain': [('state', '=', 'submitted')]},
-            'checked': {'label': 'Checked', 'domain': [('state', '=', 'checked')]},
-            'approved': {'label': 'Approved', 'domain': [('state', '=', 'approved')]},
-            'rejected': {'label': 'Rejected', 'domain': [('state', '=', 'rejected')]},
-        }
-
-        if not sortby:
-            sortby = 'date'
-        order = searchbar_sortings[sortby]['order']
-
-        status_filter = kw.get('status_filter') or filterby or 'all'
-        if status_filter not in status_options:
-            status_filter = 'all'
-        domain += status_options[status_filter]['domain']
-
-        project_option_records = self._portal_visible_contracts().mapped('project_id').filtered(lambda p: p.id)
-        project_options = [{'value': 'all', 'label': 'All Projects'}]
-        for project in project_option_records.sorted(lambda p: (p.name or '').lower()):
-            project_options.append({'value': str(project.id), 'label': project.name})
-
-        project_filter = (kw.get('project_filter') or 'all').strip()
-        if project_filter != 'all' and project_filter.isdigit():
-            domain.append(('contract_id.project_id', '=', int(project_filter)))
-        else:
-            project_filter = 'all'
-
-        direction_options = {
-            'all': {'label': 'All Directions', 'domain': []},
-            'inbound': {'label': 'Client Contract', 'domain': [('contract_id.contract_direction', '=', 'inbound')]},
-            'outbound': {'label': 'Subcontract', 'domain': [('contract_id.contract_direction', '=', 'outbound')]},
-        }
-        direction_filter = (kw.get('direction_filter') or 'all').strip()
-        if direction_filter not in direction_options:
-            direction_filter = 'all'
-        domain += direction_options[direction_filter]['domain']
-
-        measurement_count = ConstructionMeasurement.search_count(domain)
-        
-        pager = portal_pager(
-            url="/my/employee/measurements",
-            url_args={'sortby': sortby, 'status_filter': status_filter, 'project_filter': project_filter, 'direction_filter': direction_filter},
-            total=measurement_count,
-            page=page,
-            step=self._items_per_page
-        )
-
-        measurements = ConstructionMeasurement.search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
-
-        values.update({
-            'measurements': measurements,
-            'page_name': 'construction_measurement',
-            'pager': pager,
-            'searchbar_sortings': searchbar_sortings,
-            'status_options': status_options,
-            'project_options': project_options,
-            'direction_options': direction_options,
-            'sortby': sortby,
-            'status_filter': status_filter,
-            'project_filter': project_filter,
-            'direction_filter': direction_filter,
-        })
-        return request.render("construction_contract_management.portal_employee_measurements", values)
-
-# ---------------------------------------------------------
-    # CONSTRUCTION - MEASUREMENT DETAIL (with BOQ for editing)
-    # ---------------------------------------------------------
-    @http.route(['/my/employee/measurement/<int:measurement_id>'], type='http', auth='user', website=True)
-    def portal_construction_measurement_detail(self, measurement_id, report_type=None, download=False, **kw):
-        if not self._model_exists('construction.measurement'):
-            return request.redirect('/my/employee')
-        try:
-            error = request.params.get('error')
-            success = request.params.get('success')
-            allowed_contract_ids = self._portal_visible_contracts().ids
-            measurement = request.env['construction.measurement'].search([
-                ('id', '=', measurement_id),
-                ('contract_id', 'in', allowed_contract_ids),
-            ], limit=1)
-
-            if not measurement.exists():
-                return request.redirect('/my/employee/measurements')
-
-            if report_type in ('html', 'pdf', 'text'):
-                return self._show_report(
-                    model=measurement.sudo(),
-                    report_type=report_type,
-                    report_ref='construction_contract_management.action_report_construction_measurement',
-                    download=download,
-                )
-
-            contract = measurement.contract_id
-            boq_lines = contract.boq_line_ids.sorted(lambda l: (l.sequence, l.id))
-            MeasurementLine = request.env['construction.measurement.line']
-
-            existing_lines = {}
-            for line in measurement.line_ids:
-                if line.boq_line_id:
-                    existing_lines[line.boq_line_id.id] = line
-
-            previous_qty_map = {}
-            for boq_line in boq_lines:
-                approved_lines = MeasurementLine.search([
-                    ('boq_line_id', '=', boq_line.id),
-                    ('measurement_id.contract_id', '=', contract.id),
-                    ('measurement_id.state', '=', 'approved'),
-                    ('measurement_id', '!=', measurement.id),
-                ])
-                previous_qty_map[boq_line.id] = sum(approved_lines.mapped('current_qty'))
-
-            contract_revised = contract.revised_amount or sum(contract.boq_line_ids.mapped('revised_amount')) or sum(contract.boq_line_ids.mapped('total_amount')) or contract.original_amount or 0.0
-
-            approved_measurement_lines = MeasurementLine.search([
-                ('measurement_id.contract_id', '=', contract.id),
-                ('measurement_id.state', '=', 'approved'),
-            ])
-            contract_certified = sum(
-                (line.current_qty or 0.0) * (line.boq_line_id.revised_unit_rate or line.boq_line_id.unit_rate or 0.0)
-                for line in approved_measurement_lines
+            integer_fields = ('children', 'distance_home_work')
+            many2one_fields = (
+                'private_country_id', 'private_state_id', 'country_id', 'country_of_birth',
             )
+            selection_fields = ('marital', 'gender', 'certificate', 'distance_home_work_unit')
 
-            values = self._prepare_portal_layout_values()
-            values.update({
-                'measurement': measurement,
-                'boq_lines': boq_lines,
-                'existing_lines': existing_lines,
-                'previous_qty_map': previous_qty_map,
-                'contract_revised': contract_revised,
-                'contract_certified': contract_certified,
-                'error': error,
-                'success': success,
-                'page_name': 'construction_measurement',
-            })
-            return request.render("construction_contract_management.portal_employee_measurement_detail", values)
+            for field_name in char_fields + date_fields:
+                if field_name in employee._fields and field_name in post:
+                    vals[field_name] = (post.get(field_name) or '').strip() or False
 
-        except Exception as e:
-            return request.redirect('/my/employee/measurements')
+            for field_name in integer_fields:
+                if field_name in employee._fields and field_name in post:
+                    raw = (post.get(field_name) or '').strip()
+                    try:
+                        vals[field_name] = int(float(raw)) if raw else 0
+                    except (TypeError, ValueError):
+                        pass
 
-    # ---------------------------------------------------------
-    # CONSTRUCTION - ADD MEASUREMENT LINES
-    # ---------------------------------------------------------
-    @http.route(['/my/employee/measurement/<int:measurement_id>/add_lines'], 
-                type='http', auth='user', website=True, methods=['POST'], csrf=True)
-    def portal_construction_measurement_add_lines(self, measurement_id, **post):
-        if not self._model_exists('construction.measurement'):
-            return request.redirect('/my/employee')
-        try:
-            allowed_contract_ids = self._portal_visible_contracts().ids
-            measurement = request.env['construction.measurement'].search([
-                ('id', '=', measurement_id),
-                ('contract_id', 'in', allowed_contract_ids),
-            ], limit=1)
+            for field_name in many2one_fields:
+                if field_name in employee._fields and field_name in post:
+                    raw = (post.get(field_name) or '').strip()
+                    vals[field_name] = int(raw) if raw.isdigit() else False
 
-            if not measurement.exists():
-                return request.redirect('/my/employee/measurements')
+            for field_name in selection_fields:
+                if field_name in employee._fields and field_name in post:
+                    raw = (post.get(field_name) or '').strip()
+                    allowed = dict(employee._fields[field_name]._description_selection(request.env))
+                    if not raw or raw in allowed:
+                        vals[field_name] = raw or False
 
-            if measurement.state != 'draft':
-                return request.redirect(f'/my/employee/measurement/{measurement_id}')
+            if vals:
+                employee.write(vals)
 
-            boq_lines = measurement.contract_id.boq_line_ids.sorted(lambda l: (l.sequence, l.id))
-            MeasurementLine = request.env['construction.measurement.line'].sudo()
-            validation_errors = []
+            # Optional work-permit attachment (exact Odoo 18 field: has_work_permit).
+            uploaded_permit = request.httprequest.files.get('work_permit_file')
+            if uploaded_permit and 'has_work_permit' in employee._fields:
+                content = uploaded_permit.read()
+                if content:
+                    employee.write({'has_work_permit': base64.b64encode(content)})
 
-            for boq_line in boq_lines:
-                qty_str = (post.get(f'qty_{boq_line.id}') or '0').strip()
-                qty_percent_str = (post.get(f'qty_percent_{boq_line.id}') or '').strip()
-                remarks = (post.get(f'remarks_{boq_line.id}') or '').strip()
-                allowed_qty = boq_line.revised_qty or boq_line.contract_qty or 0.0
-
-                try:
-                    current_qty = float(qty_str)
-                except (ValueError, TypeError):
-                    current_qty = 0.0
-
-                try:
-                    qty_percent = float(qty_percent_str) if qty_percent_str else None
-                except (ValueError, TypeError):
-                    qty_percent = None
-
-                if qty_percent is not None and allowed_qty:
-                    current_qty = (allowed_qty * qty_percent) / 100.0
-
-                existing_line = MeasurementLine.search([
-                    ('measurement_id', '=', measurement.id),
-                    ('boq_line_id', '=', boq_line.id),
-                ], limit=1)
-
-                approved_lines = MeasurementLine.search([
-                    ('boq_line_id', '=', boq_line.id),
-                    ('measurement_id.contract_id', '=', measurement.contract_id.id),
-                    ('measurement_id.state', '=', 'approved'),
-                    ('measurement_id', '!=', measurement.id),
-                ])
-
-                previous_qty = sum(approved_lines.mapped('current_qty'))
-                cumulative_qty = previous_qty + current_qty
-
-                if not boq_line.display_type and current_qty > 0 and allowed_qty and cumulative_qty > allowed_qty:
-                    label = boq_line.item_code or (boq_line.description or '')[:30]
-                    validation_errors.append(
-                        f"{label}: cumulative {cumulative_qty:.2f} exceeds allowed {allowed_qty:.2f}"
-                    )
-                    continue
-
-                line_vals = {
-                    'measurement_id': measurement.id,
-                    'boq_line_id': boq_line.id,
-                    'previous_qty': 0.0 if boq_line.display_type else previous_qty,
-                    'current_qty': 0.0 if boq_line.display_type else current_qty,
-                    'remarks': False if boq_line.display_type else (remarks or False),
-                }
-
-                try:
-                    if existing_line:
-                        existing_line.write(line_vals)
+            # Odoo 18 uses hr.employee.bank_account_id (res.partner.bank).
+            # Employees may submit/change their IBAN/account number, but the
+            # new account is deliberately left UNTRUSTED so Finance/HR must
+            # review it before Payroll can send money to it.
+            if 'bank_account_id' in employee._fields and 'bank_account_number' in post:
+                submitted = (post.get('bank_account_number') or '').strip()
+                current = employee.bank_account_id.sudo()
+                current_number = (current.acc_number or '').strip() if current else ''
+                if submitted != current_number:
+                    if not submitted:
+                        employee.write({'bank_account_id': False})
+                        bank_changed = True
                     else:
-                        MeasurementLine.create(line_vals)
-                except ValidationError as ve:
-                    label = boq_line.item_code or (boq_line.description or '')[:30] or (boq_line.description or 'BOQ Line')
-                    validation_errors.append(f"{label}: {str(ve)}")
+                        partner = employee.work_contact_id.sudo()
+                        if not partner:
+                            employee._create_work_contacts()
+                            partner = employee.work_contact_id.sudo()
+                        new_bank = request.env['res.partner.bank'].sudo().create({
+                            'acc_number': submitted,
+                            'partner_id': partner.id,
+                        })
+                        # Never auto-trust a bank account submitted from portal.
+                        if 'allow_out_payment' in new_bank._fields and new_bank.allow_out_payment:
+                            new_bank.allow_out_payment = False
+                        employee.write({'bank_account_id': new_bank.id})
+                        bank_changed = True
 
-            if validation_errors:
-                message = "Some quantities could not be saved:<br/>" + "<br/>".join(validation_errors)
-                measurement.message_post(body=message, message_type='comment')
-                return request.redirect(f'/my/employee/measurement/{measurement_id}?error=validation')
+            # Mirror only business phone numbers to the user's contact.
+            partner_vals = {}
+            if 'work_phone' in post:
+                partner_vals['phone'] = (post.get('work_phone') or '').strip()
+            if 'mobile_phone' in post:
+                partner_vals['mobile'] = (post.get('mobile_phone') or '').strip()
+            if partner_vals:
+                user.partner_id.sudo().write(partner_vals)
+            saved = True
 
-            action = post.get('action', 'save')
-            measurement = request.env['construction.measurement'].sudo().browse(measurement_id)
-            measurement.contract_id.boq_line_ids._compute_progress_fields()
-            measurement.contract_id._compute_summary_amounts()
-            positive_lines = measurement.line_ids.filtered(lambda l: not l.display_type and l.current_qty > 0)
-
-            if action == 'submit':
-                if not positive_lines:
-                    return request.redirect(f'/my/employee/measurement/{measurement_id}?error=no_lines')
-
-                try:
-                    measurement.action_submit()
-                except Exception:
-                    measurement.write({'state': 'submitted'})
-                measurement.message_post(
-                    body=f"Measurement submitted for approval by {request.env.user.name}",
-                    message_type='notification',
-                )
-                return request.redirect(f'/my/employee/measurement/{measurement_id}?success=submitted')
-
-            return request.redirect(f'/my/employee/measurement/{measurement_id}?success=saved')
-
-        except Exception as e:
-            return request.redirect(f'/my/employee/measurement/{measurement_id}?error=system')
-
-   # ---------------------------------------------------------
-    # CONSTRUCTION - NEW MEASUREMENT FORM (FIXED)
-    # ---------------------------------------------------------
-    @http.route(['/my/employee/measurement/new'], type='http', auth='user', website=True, methods=['GET', 'POST'])
-    def portal_construction_measurement_new(self, **post):
-        user = request.env.user
-
-        if not self._model_exists('construction.measurement') or not request.env['construction.measurement'].check_access_rights('create', raise_exception=False):
-            return request.redirect("/my/employee")
-
-        def _measurement_new_values(error_message=None):
-            contracts = self._portal_visible_contracts()
-            if not error_message and not contracts:
-                error_message = "You do not have access to any contracts for creating a measurement."
-            return {
-                'contracts': contracts,
-                'has_contracts': bool(contracts),
-                'page_name': 'construction_measurement_new',
-                'error_message': error_message,
-            }
-
-        if request.httprequest.method == 'POST':
-            try:
-                allowed_contract_ids = self._portal_visible_contracts().ids
-                contract_id = int(post.get('contract_id'))
-                if contract_id not in allowed_contract_ids:
-                    return request.render(
-                        "construction_contract_management.portal_employee_measurement_new",
-                        _measurement_new_values("You are not allowed to create a measurement for this contract.")
-                    )
-
-                vals = {
-                    'contract_id': contract_id,
-                    'date': post.get('date') or False,
-                    'period_from': post.get('period_from') or False,
-                    'period_to': post.get('period_to') or False,
-                }
-
-                measurement = request.env['construction.measurement'].sudo().create(vals)
-                measurement.action_load_boq_lines()
-                return request.redirect(f'/my/employee/measurement/{measurement.id}')
-            except Exception:
-                return request.render(
-                    "construction_contract_management.portal_employee_measurement_new",
-                    _measurement_new_values("Could not create the measurement. Please check the entered data and try again.")
-                )
-
-        return request.render("construction_contract_management.portal_employee_measurement_new", _measurement_new_values())
-
-    # ---------------------------------------------------------
-    # CONSTRUCTION - NEW VARIATION FORM (FIXED)
-    # ---------------------------------------------------------
-    @http.route(['/my/employee/variation/new'], type='http', auth='user', website=True, methods=['GET', 'POST'])
-    def portal_construction_variation_new(self, **post):
-        user = request.env.user
-
-        if not self._model_exists('construction.variation') or not request.env['construction.variation'].check_access_rights('create', raise_exception=False):
-            return request.redirect("/my/employee")
-
-        def _variation_new_values(error_message=None):
-            contracts = self._portal_visible_contracts()
-            if not error_message and not contracts:
-                error_message = "You do not have access to any contracts for creating a variation."
-            return {
-                'contracts': contracts,
-                'has_contracts': bool(contracts),
-                'page_name': 'construction_variation_new',
-                'error_message': error_message,
-            }
-
-        if request.httprequest.method == 'POST':
-            allowed_contract_ids = self._portal_visible_contracts().ids
-            contract_id = int(post.get('contract_id'))
-            if contract_id not in allowed_contract_ids:
-                return request.render(
-                    "construction_contract_management.portal_employee_variation_new",
-                    _variation_new_values("You are not allowed to create a variation for this contract.")
-                )
-
-            vals = {
-                'contract_id': contract_id,
-                'date': post.get('date'),
-                'description': post.get('description', ''),  # Variation DOES have description field
-            }
-            
-            # Add reason to description if provided
-            if post.get('reason'):
-                vals['description'] = vals['description'] + '\n\nReason: ' + post.get('reason')
-            
-            try:
-                variation = request.env['construction.variation'].create(vals)
-                return request.redirect(f'/my/employee/variation/{variation.id}')
-            except Exception:
-                return request.render(
-                    "construction_contract_management.portal_employee_variation_new",
-                    _variation_new_values("Could not create the variation. Please check the entered data and try again.")
-                )
-
-        return request.render("construction_contract_management.portal_employee_variation_new", _variation_new_values())
+        countries = request.env['res.country'].sudo().search([], order='name')
+        states = request.env['res.country.state'].sudo().search([], order='name')
+        bank_account = employee.bank_account_id.sudo() if 'bank_account_id' in employee._fields else False
+        company_is_saudi = bool(employee.company_id.country_id.code == 'SA')
+        return request.render('employee_portal_suite.employee_profile_edit', {
+            'employee': employee,
+            'saved': saved,
+            'bank_changed': bank_changed,
+            'bank_account': bank_account,
+            'countries': countries,
+            'states': states,
+            'login_email': user.login or user.partner_id.email or '',
+            'company_is_saudi': company_is_saudi,
+        })

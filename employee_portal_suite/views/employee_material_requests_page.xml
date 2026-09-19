@@ -65,11 +65,11 @@
                     <tbody>
                         <t t-foreach="requests" t-as="req">
                             <tr>
-                                <td><t t-esc="req.name"/></td>
-                                <td><t t-esc="req.request_date"/></td>
-                                <td><t t-esc="req.worksite"/></td>
-                                <td><t t-esc="req.delivery_date"/></td>
-                                <td><t t-raw="status_badge(req)"/></td>
+                                <td><t t-out="req.name"/></td>
+                                <td><t t-out="req.request_date"/></td>
+                                <td><t t-out="req.worksite"/></td>
+                                <td><t t-out="req.delivery_date"/></td>
+                                <td><t t-out="status_badge(req)"/></td>
                                 <td>
                                     <a t-att-href="'/my/employee/material/%s' % req.id"
                                     class="btn btn-secondary btn-sm">View</a>
@@ -90,27 +90,27 @@
                         <div class="mobile-request-top">
                             <div>
                                 <div class="mobile-request-id">
-                                    <t t-esc="req.name"/>
+                                    <t t-out="req.name"/>
                                 </div>
                                 <div class="mobile-request-date">
-                                    <t t-esc="req.request_date"/>
+                                    <t t-out="req.request_date"/>
                                 </div>
                             </div>
 
                             <div>
-                                <t t-raw="status_badge(req)"/>
+                                <t t-out="status_badge(req)"/>
                             </div>
                         </div>
 
                         <div class="mobile-request-body">
                             <div>
                                 <span class="label">Worksite</span>
-                                <div><t t-esc="req.worksite"/></div>
+                                <div><t t-out="req.worksite"/></div>
                             </div>
 
                             <div>
                                 <span class="label">Delivery</span>
-                                <div><t t-esc="req.delivery_date"/></div>
+                                <div><t t-out="req.delivery_date"/></div>
                             </div>
                         </div>
 

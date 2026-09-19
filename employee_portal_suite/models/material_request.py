@@ -58,12 +58,22 @@ class MaterialRequest(models.Model):
             tracking=True
     )
 
+    available_project_ids = fields.Many2many(
+        "project.project",
+        string="Available Projects",
+        compute="_compute_available_projects",
+    )
+
+    project_selection_locked = fields.Boolean(
+        string="Project Selection Locked",
+        compute="_compute_available_projects",
+    )
+
     project_id = fields.Many2one(
         "project.project",
         string="Project",
-        compute="_compute_project_from_employee",
-        store=True,
-        tracking=True
+        tracking=True,
+        domain="[('id', 'in', available_project_ids)]",
     )
     store_manager_user_id = fields.Many2one(
         "res.users",
@@ -170,8 +180,6 @@ class MaterialRequest(models.Model):
         return [
             ("res_model", "=", "material.request"),
             ("res_id", "=", self.id),
-            "|",
-            ("mr_attachment_category", "=", category),
             ("description", "=", legacy_description),
         ]
 
@@ -251,7 +259,6 @@ class MaterialRequest(models.Model):
                 rec.state == "approved"
                 and rec.no_po_required
                 and not rec.purchase_order_ids
-                and not rec.vendor_bill_ids.filtered(lambda move: move.move_type == "in_invoice")
             )
 
     def _prepare_vendor_bill_line_vals(self):
@@ -367,6 +374,15 @@ class MaterialRequest(models.Model):
         return False
 
     def write(self, vals):
+        vals = dict(vals)
+        if "project_id" in vals or "employee_id" in vals:
+            for rec in self:
+                employee = self.env["hr.employee"].browse(vals.get("employee_id")) if vals.get("employee_id") else rec.employee_id
+                project = self.env["project.project"].browse(vals.get("project_id")) if vals.get("project_id") else (False if "project_id" in vals else rec.project_id)
+                location = employee._find_project_location(project) if employee and project else False
+                # For multi-record writes, only set the shared value when all records resolve identically.
+                if len(self) == 1:
+                    vals["work_location_id"] = location.id if location else False
 
         if "needs_clarification" in vals:
             for rec in self:
@@ -450,17 +466,54 @@ class MaterialRequest(models.Model):
     # Rejection info
     state_before_reject = fields.Char()
     rejected_by = fields.Many2one('res.users')
-    #new
-    @api.depends("employee_id")
-    def _compute_project_from_employee(self):
+    # Employee project routing
+    @api.depends(
+        "employee_id",
+        "employee_id.work_location_ids",
+        "employee_id.work_location_ids.project_line_ids.project_id",
+        "employee_id.work_location_id",
+        "employee_id.work_location_id.project_line_ids.project_id",
+    )
+    def _compute_available_projects(self):
+        for rec in self:
+            projects = (
+                rec.employee_id._get_material_request_projects()
+                if rec.employee_id
+                else self.env["project.project"]
+            )
+            rec.available_project_ids = projects
+            rec.project_selection_locked = len(projects) <= 1
+
+    @api.onchange("employee_id")
+    def _onchange_employee_material_projects(self):
         for rec in self:
             employee = rec.employee_id
-            if employee and employee.work_location_id:
-                rec.work_location_id = employee.work_location_id
-                rec.project_id = employee.work_location_id.project_id
-            else:
-                rec.work_location_id = False
+            projects = employee._get_material_request_projects() if employee else self.env["project.project"]
+            if len(projects) == 1:
+                rec.project_id = projects.id
+                rec.work_location_id = employee._find_project_location(projects)
+            elif rec.project_id not in projects:
                 rec.project_id = False
+                rec.work_location_id = False
+            elif rec.project_id:
+                rec.work_location_id = employee._find_project_location(rec.project_id)
+
+    @api.onchange("project_id")
+    def _onchange_project_work_location(self):
+        for rec in self:
+            rec.work_location_id = (
+                rec.employee_id._find_project_location(rec.project_id)
+                if rec.employee_id and rec.project_id else False
+            )
+
+    @api.constrains("employee_id", "project_id")
+    def _check_employee_project(self):
+        for rec in self:
+            if not rec.employee_id or not rec.project_id:
+                continue
+            allowed = rec.employee_id._get_material_request_projects()
+            if rec.project_id not in allowed:
+                raise ValidationError(_("The selected project is not configured in any of this employee's work locations."))
            
     @api.depends("project_id")
     def _compute_project_approvers(self):
@@ -541,11 +594,22 @@ class MaterialRequest(models.Model):
     # ---------------------------------------------------------
     # CREATE SEQUENCE
     # ---------------------------------------------------------
-    @api.model
-    def create(self, vals):
-        if vals.get("name", _("New")) == _("New"):
-            vals["name"] = self.env["ir.sequence"].next_by_code("material.request.seq") or _("New")
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get("name", _("New")) == _("New"):
+                vals["name"] = self.env["ir.sequence"].next_by_code("material.request.seq") or _("New")
+
+            employee = self.env["hr.employee"].browse(vals.get("employee_id")) if vals.get("employee_id") else False
+            if employee:
+                projects = employee._get_material_request_projects()
+                if not vals.get("project_id") and len(projects) == 1:
+                    vals["project_id"] = projects.id
+                project = self.env["project.project"].browse(vals.get("project_id")) if vals.get("project_id") else False
+                location = employee._find_project_location(project) if project else False
+                vals["work_location_id"] = location.id if location else False
+
+        return super().create(vals_list)
 
     # ---------------------------------------------------------
     # GENERIC STATE ADVANCE
@@ -613,15 +677,19 @@ class MaterialRequest(models.Model):
     # NOTIFY / ACTIVITY HELPERS
     # ---------------------------------------------------------
     def _notify_user(self, user, subject, body):
-        if not user or not user.partner_id.email:
+        if not user:
             return
-        mail_values = {
-            "subject": subject,
-            "body_html": f"<p>{body}</p>",
-            "email_to": user.partner_id.email,
-            "author_id": self.env.user.partner_id.id,
-        }
-        self.env["mail.mail"].sudo().create(mail_values).send()
+        if user.partner_id.email:
+            mail_values = {
+                "subject": subject,
+                "body_html": f"<p>{body}</p>",
+                "email_to": user.partner_id.email,
+                "author_id": self.env.user.partner_id.id,
+            }
+            self.env["mail.mail"].sudo().create(mail_values).send()
+        self.env['employee.portal.telegram.service'].sudo().send_to_user(
+            user, subject, body, f"/my/employee/material/approvals/{self.id}"
+        )
 
     def _schedule_activity(self, user, summary, note):
         self.activity_schedule(
@@ -668,6 +736,8 @@ class MaterialRequest(models.Model):
             # 🔴 REQUIRED: at least one material line
             if not rec.line_ids:
                 raise UserError(_("You must add at least one material line before submitting the request."))
+            if not rec.project_id:
+                raise UserError(_("You must select the project for this Material Request before submitting it."))
 
             rec.state = "purchase"
             rec.message_post(body="Material Request submitted.")
@@ -764,6 +834,13 @@ class MaterialRequest(models.Model):
 
             rec.message_post(body="Material Request fully approved.")
             rec.activity_ids.action_done()
+            if rec.employee_id.user_id:
+                rec.env['employee.portal.telegram.service'].sudo().send_to_user(
+                    rec.employee_id.user_id,
+                    f"Material Request {rec.name} approved",
+                    f"Your Material Request {rec.name} has been fully approved.",
+                    f"/my/employee/material/{rec.id}"
+                )
 
     def action_reject(self):
         for rec in self:
@@ -794,6 +871,13 @@ class MaterialRequest(models.Model):
 
             rec.message_post(body="Material Request rejected.")
             rec.activity_ids.action_done()
+            if rec.employee_id.user_id:
+                rec.env['employee.portal.telegram.service'].sudo().send_to_user(
+                    rec.employee_id.user_id,
+                    f"Material Request {rec.name} rejected",
+                    f"Your Material Request {rec.name} has been rejected.",
+                    f"/my/employee/material/{rec.id}"
+                )
 
     def get_rejection_reason(self):
         self.ensure_one()
