@@ -1,12 +1,13 @@
 from odoo import http
 from odoo.http import request
+from markupsafe import Markup, escape
 
 def _er_status_badge(rec):
     state = rec.state
 
     # APPROVED
     if state == "approved":
-        return '<span class="badge bg-success">Fully Approved</span>'
+        return Markup('<span class="badge bg-success">Fully Approved</span>')
 
     # REJECTED WITH STAGE
     if state == "rejected":
@@ -19,7 +20,7 @@ def _er_status_badge(rec):
 
         lbl = stage_labels.get(rec.state_before_reject, "Unknown Stage")
 
-        return f'<span class="badge bg-danger">Rejected — {lbl} Stage</span>'
+        return Markup('<span class="badge bg-danger">Rejected — %s Stage</span>') % escape(lbl)
     # PENDING STAGES
     stage_labels = {
         'manager': 'Pending Manager',
@@ -29,9 +30,9 @@ def _er_status_badge(rec):
     }
 
     if state in stage_labels:
-        return f'<span class="badge bg-warning text-dark">{stage_labels[state]}</span>'
+        return Markup('<span class="badge bg-warning text-dark">%s</span>') % escape(stage_labels[state])
 
-    return '<span class="badge bg-secondary">Unknown</span>'
+    return Markup('<span class="badge bg-secondary">Unknown</span>')
 
 class EmployeePortalRequests(http.Controller):
 
@@ -41,7 +42,8 @@ class EmployeePortalRequests(http.Controller):
     # Helper
     # ---------------------------------------------------------
     def _get_employee(self):
-        return request.env.user.employee_id
+        user = request.env.user
+        return user.employee_id if user.share else request.env['hr.employee']
 
     # ---------------------------------------------------------
     # EMPLOYEE — LIST OWN REQUESTS
@@ -228,6 +230,10 @@ class EmployeePortalRequests(http.Controller):
         # ---------------------------------------------------------
         if search:
             shown_reqs = [r for r in shown_reqs if search.lower() in (r.name or "").lower()]
+
+        # Clear the "new approval" badge on the dashboard/header bell now that
+        # the user has opened the approvals list.
+        request.env['portal.report.seen'].sudo()._mark_seen(user.id, 'er_approval')
 
         return request.render("employee_portal_suite.portal_employee_approvals_list", {
             "pending_reqs": pending_list,

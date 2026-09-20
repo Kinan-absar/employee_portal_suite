@@ -59,6 +59,8 @@ class EmployeePortalSignDocs(CustomerPortal):
     def portal_employee_sign_docs(self, filter="pending", search=None, **kwargs):
 
         user = request.env.user
+        if not user.share:
+            return request.redirect('/web')
         partner = user.partner_id
         SignItem = request.env["sign.request.item"].sudo()
 
@@ -118,6 +120,10 @@ class EmployeePortalSignDocs(CustomerPortal):
 
         # Sort newest → oldest
         documents = sorted(documents, key=lambda d: d["date"], reverse=True)
+
+        # Clear the "new signature request" badge on the dashboard/header bell
+        # now that the user has opened this page.
+        request.env['portal.report.seen'].sudo()._mark_seen(user.id, 'sign_request')
 
         return request.render(
             "employee_portal_suite.portal_sign_documents_page",
