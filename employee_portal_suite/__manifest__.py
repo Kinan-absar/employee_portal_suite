@@ -32,6 +32,7 @@
     "currency": 'USD',
     "price": 249.99,
     'author': 'Kinan',
+    'live_test_url': 'https://www.absar-alomran.com/request-demo',
     'category': 'Human Resources',
     'application': True,
     'installable': True,
